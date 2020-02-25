@@ -4,15 +4,17 @@ import logging
 
 import torch
 
-from .data_LM import stoi, itos
-from .model import Model
+#from .data_LM import stoi, itos
+#from .model import Model
+from data_LM import stoi, itos
+from model import Model
 
 # set weights path
 file_path = os.path.dirname(os.path.abspath(__file__))
 WEIGHTS_DIR = os.path.join(file_path, "weight")
 WEIGHT_FILE_NAME = "Tokenizer_2019-11-11_04.24.19"
-WEIGHTS_PATH = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME + ".pth.tar")
-args_path = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME + ".json")
+WEIGHTS_PATH = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME+".pth.tar")
+PARAMS = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME+".json")
 
 cuda = torch.cuda.is_available()
 logging.info("GPU available", torch.cuda.is_available())
@@ -45,7 +47,7 @@ def _remove_white_space(text):
 class LM_CUT:
 
     def __init__(self):
-        args_dict = _load_args(args_path)
+        args_dict = _load_args(PARAMS)
         char_embedding_size = args_dict["char_embedding_size"]
         hidden_dim = args_dict["hidden_dim"]
         layer_num = args_dict["layer_num"]

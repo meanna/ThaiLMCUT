@@ -1,12 +1,17 @@
 import argparse
-import torch
 import math
 import time
 import random
-import get_corpus_lm, util, data_LM
-from torch.autograd import Variable
 from timeit import default_timer as timer
 from datetime import timedelta
+import os
+
+import torch
+from torch.autograd import Variable
+
+import get_corpus_lm, util, data_LM
+from set_path import CHECKPOINTS_LM
+
 
 start = timer()
 timestr = time.strftime("%Y-%m-%d_%H.%M.%S")
@@ -34,30 +39,31 @@ parser.add_argument("--clip_grad", type=float, default=0.5)
 # training parameters
 parser.add_argument("--learning_rate", type=float, default=1)
 parser.add_argument("--optim", type=str, default="adam")  # sgd or adam
-parser.add_argument("--sgd_momentum", type=float, default=0.02)  # 0.02, 0.9
+parser.add_argument("--sgd_momentum", type=float, default=0.02)
 parser.add_argument("--adam_lr_decay", type=float, default=0.00)
 parser.add_argument("--lr_decay", type=float, default=0.01)
 parser.add_argument("--epoch", type=int, default=1)
 
 # dataset parameters
-parser.add_argument("--dataset", type=str, default="small")
+parser.add_argument("--dataset", type=str, default="default")
 parser.add_argument("--len_lines_per_chunk", type=int, default=100)
 
-# log file parameters
+# 1 for saving a resumed model to the old model, 0 for saving it as a new model
 parser.add_argument("--over_write", type=int, default=0)
 parser.add_argument("--add_note", type=str)
 
 args = parser.parse_args()
 args_dict = vars(args)
 
-import set_path
-CHECKPOINTS_LM = set_path.CHECKPOINTS_LM#"./checkpoints_LM/"
+
 train = True
 
 if args.load_from is None:
-    print("-----------start training the language model----------")
+    print("-----------start training a language model----------")
 else:
-    print("-----------resume training the language model--------")
+    print("-----------resume training a language model--------")
+
+save_path = os.path.join( CHECKPOINTS_LM,args.save_to + ".pth.tar")
 
 # set a default note
 if args.add_note is None:
@@ -75,10 +81,11 @@ if args.load_from is not None and args.over_write == 1:
 
 print("model name: " , args.save_to)
 cuda = torch.cuda.is_available()
-print("cuda: ,", torch.cuda.is_available())
+print("GPU: ,", torch.cuda.is_available())
 
 itos = data_LM.itos
-util.export_args(args_dict, CHECKPOINTS_LM + args.save_to)
+param_path = os.path.join(CHECKPOINTS_LM, args.save_to)
+util.export_args(args_dict, param_path)
 
 class Model:
     """
@@ -119,11 +126,14 @@ class Model:
             self.optim = torch.optim.SGD(self.parameters(self.modules), lr=learning_rate,
                                          momentum=args.sgd_momentum)  # 0.02, 0.9
 
-        # do not save "optim" parameter
         self.named_modules = {"rnn": self.rnn, "output": self.output, "char_embeddings": self.char_embeddings}
 
         if args.load_from is not None:
-            checkpoint = torch.load(CHECKPOINTS_LM + args.load_from + ".pth.tar")
+            weights_path = os.path.join(CHECKPOINTS_LM,args.load_from + ".pth.tar")
+            if cuda:
+                checkpoint = torch.load(weights_path)
+            else:
+                checkpoint = torch.load(weights_path, map_location=torch.device('cpu'))
             for name, module in self.named_modules.items():
                 module.load_state_dict(checkpoint[name])
             print("load parameters and weights....")
@@ -168,7 +178,9 @@ class Model:
 
 
 def save_log(mode="w"):
-    with open(CHECKPOINTS_LM + args.save_to, mode) as outFile:
+    #TODO
+    log_path = os.path.join(CHECKPOINTS_LM, args.save_to +".log")
+    with open(log_path) as outFile:
         if mode == "a":
             print("----------resume the training ---------", file=outFile)
         else:
@@ -189,11 +201,6 @@ def save_log(mode="w"):
         print("trainLosses ", trainLosses, file=outFile)
         print("devLosses ", devLosses, file=outFile)
         print("", file=outFile)
-        print("count train sample ", count_train_samples, file=outFile)
-        print("count dev sample ", count_dev_samples, file=outFile)
-
-        print("", file=outFile)
-        print("", file=outFile)
         l = str(args)[10:].strip(")").split(",")
 
         for i in l:
@@ -211,6 +218,7 @@ def save_log(mode="w"):
 
 # append the result in "LM_log.csv"
 def save_csv(f= "LM_log.csv"):
+    #TODO
     with open(CHECKPOINTS_LM + f, "a") as table:
         print("---------save training results------")
         print(args.save_to, file=table, end=';')
@@ -228,8 +236,6 @@ def save_csv(f= "LM_log.csv"):
 
 
 # model training
-count_train_samples = 0
-count_dev_samples = 0
 num_epoch=1
 if train:
     model = Model(bi_lstm)
@@ -262,12 +268,9 @@ if train:
             try:
                 numeric = next(training_chars)
             except StopIteration:
-                print("end of the batch")
                 break
 
             loss, charCounts = model.forward(numeric, train=True)  # ---- training
-            if epoch == 0:
-                count_train_samples += args.batchSize
 
             model.backward(loss)
 
@@ -275,12 +278,12 @@ if train:
             trainChars += charCounts
 
         trainLosses.append(train_loss_ / trainChars)
-        print("trainLosses ", trainLosses)
+        print("train losses ", trainLosses)
 
         if True:
             print("save model parameters... ")
             torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]),
-                       CHECKPOINTS_LM + args.save_to + ".pth.tar")
+                       save_path)
             save_csv(f= "LM_log_temp.csv")
 
         model.rnn.train(False)
@@ -303,8 +306,6 @@ if train:
             loss, numberOfCharacters = model.forward(numeric, train=False)
             dev_loss += numberOfCharacters * loss.cpu().data.numpy()
             dev_char_count += numberOfCharacters
-            if epoch == 0:
-                count_dev_samples += args.batchSize
 
         devLosses.append(dev_loss / dev_char_count)
         print("dev losses ", devLosses)
@@ -325,7 +326,7 @@ if train:
         if True:
             print("save model parameters... ")
             torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]),
-                       CHECKPOINTS_LM + args.save_to + ".pth.tar")
+                       save_path)
             save_csv(f= "LM_log_temp.csv")
 
         if args.optim == "adam" and adam_with_lr_decay:
@@ -340,11 +341,3 @@ end = timer()
 total_time = timedelta(seconds=end - start)
 print(timedelta(seconds=end - start))
 save_csv()
-print()
-config = args
-p = util.get_param(str(args))
-print("config for later download")
-print(p)
-print(args.add_note)
-print("count train sample ", count_train_samples)
-print("count dev sample ", count_dev_samples)

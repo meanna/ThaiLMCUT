@@ -1,50 +1,20 @@
 import random
+import os
+
+#from .set_path import HOME
+from set_path import HOME
+
 random.seed(4)
-import set_path
+
 # define the dataset paths for the language model
 
-path = set_path.HOME
-def get_path_data(dataset_size="small"):
 
-    # datasets for out-of-domain experiment
-    # E.g. --dataset_size ty_without_novel,  ty_without_news
-    # ty_without_novel means the corpus consists of trustyou + 3 domains from BEST2009 without novel domain
-    if dataset_size[:11] == "ty_without_":
-        path_domain = path+"/data/TY_dataset/domain_exp/TY_without_each_domain_9-1/"
-        dom =  dataset_size[11:]
-        print(" train on ty_without_"+dom)
-        train_path = path_domain + "TY_without_"+dom+"_train_0.9.txt"
-        dev_path = path_domain + "TY_without_"+dom+"_dev_0.1.txt"
-        test_path = ""
+def get_path_data(dataset_size="default"):
 
-    elif dataset_size == "small":
-        print("train on small dataset")
-        train_path = path+"/data/TY_dataset/trustyou_toy_train_2000.txt"
-        dev_path = path+"/data/TY_dataset/trustyou_toy_dev_1000.txt"
-        test_path = ""
-
-    elif dataset_size == "sample":
+    if dataset_size == "default":
         print("train on sample set")
-        train_path = path+"/sample_data/trustyou_toy_train_2000.txt"
-        dev_path = path+"/sample_data/trustyou_toy_dev_1000.txt"
-        test_path = ""
-
-    elif dataset_size == "big":
-        print("train on big dataset")
-        train_path = path+"/data/TY_dataset/trustyou_toy_train_4000.txt"
-        dev_path = path+"/data/TY_dataset/trustyou_toy_dev_2000.txt"
-        test_path = ""
-
-    elif dataset_size == "trustyou":
-        print("train on full trustyou dataset")
-        train_path = path+"/data/TY_dataset/trustyou_train_0.9.txt"
-        dev_path = path+"/data/TY_dataset/trustyou_dev_0.1.txt"
-        test_path = ""
-
-    elif dataset_size == "trustyou_best":
-        print(" train on trustyou+ BEST(train, dev) dataset")
-        train_path = path+"/data/TY_dataset/TY_BEST_train_0.9.txt"
-        dev_path = path+"/data/TY_dataset/TY_BEST_dev_0.1.txt"
+        train_path = os.path.join(HOME,"data", "news_00001.txt")
+        dev_path =os.path.join(HOME,"data", "news_00001.txt")
         test_path = ""
 
     else:

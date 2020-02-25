@@ -1,5 +1,4 @@
 import argparse
-import re
 import torch
 import math
 import time
@@ -11,8 +10,9 @@ from itertools import chain
 from timeit import default_timer as timer
 from datetime import timedelta
 from set_path import CHECKPOINTS_LM, CHECKPOINTS_TOKENIZER
-import logging
-logging.basicConfig(filename='myapp.log', level=logging.INFO)
+import re
+
+
 
 timestr = time.strftime("%Y-%m-%d_%H.%M.%S")
 
@@ -45,7 +45,7 @@ parser.add_argument("--lr_decay", type=float, default=0.01)
 parser.add_argument("--epoch", type=int, default=1)
 
 # dataset parameters
-parser.add_argument("--dataset", type=str, default="small")  # small, big, full
+parser.add_argument("--dataset", type=str, default="default")  # small, big, full
 parser.add_argument("--len_lines_per_chunk", type=int, default=100)
 
 # log file parameters
@@ -68,16 +68,16 @@ start_training = True
 # if resume the training
 if args.load_from is not None:
     if str(args.load_from)[:9] == "Tokenizer":
-        logging.info("resume training the tokenizer..." + args.load_from)
+        print("resume training the tokenizer..." + args.load_from)
         CHECKPOINTS = CHECKPOINTS_TOKENIZER  # path to the folder that store the trained model, if any
         if args.over_write == 1:
             args.save_to = args.load_from  # overwrite the weights
-            logging.info("overwrite the weights to ", args.save_to)
+            print("overwrite the weights to ", args.save_to)
 
     # if start training a new model (with and without downloading LM)
     elif str(args.load_from)[:2] == "LM":
         CHECKPOINTS = CHECKPOINTS_LM
-        logging.info("download the language model from " + args.load_from)
+        print("download the language model from " + args.load_from)
 
     # get the network structure from the loaded model
     if True:
@@ -93,31 +93,31 @@ if args.load_from is not None:
         # sgd_momentum = args_dict["sgd_momentum"]
         args.len_lines_per_chunk = args_dict["len_lines_per_chunk"]
         args.optim = args_dict["optim"]
-        logging.info("get the network structure from the loaded model...")
+        print("get the network structure from the loaded model...")
 
 # set the default note
 if args.add_note is None:
     args.add_note = "load from "+ str(args.load_from)+" , "+str(args.dataset)+ " , lr "+ str(args.learning_rate)+ ", epoch "+ str(args.epoch)
 
-logging.info(args)
-logging.info("save to ", args.save_to)
+print(args)
+print("save to ", args.save_to)
 
 no_dot = args.with_dot == 0
-logging.info("remove fullstops from the input data ", no_dot)
+print("remove fullstops from the input data ", no_dot)
 save_weights = args.save_weight == 1
 bi_lstm = args.lstm_num_direction == 2
 adam_with_lr_decay = args.adam_lr_decay != 0
 
 cuda = torch.cuda.is_available()
-logging.info("cuda....,", torch.cuda.is_available())
+print("cuda....,", torch.cuda.is_available())
 
 # print the last tokenization output for every batch
 printPrediction = args.printPrediction == 1
 printAllPrediction = False
 
-logging.info("train for ", args.epoch, " epoch")
+print("train for ", args.epoch, " epoch")
 util.export_args(args_dict, CHECKPOINTS_TOKENIZER + args.save_to)
-logging.info("export parameters as json")
+print("export parameters as json")
 
 # ------------------ define vocabulary----------------
 stoi = data_LM.stoi  # dictionary for character-id mapping
@@ -165,20 +165,20 @@ class Model:
         # if the language model is imported, do not download the output layer and optim
         if str(args.load_from)[:2] == "LM":
             self.named_modules = {"rnn": self.rnn, "char_embeddings": self.char_embeddings}
-            logging.info("get the embedding and rnn layer from the pretrained language model")
+            print("get the embedding and rnn layer from the pretrained language model")
         # if a tokenizer is imported, also download optim
         else:
             self.named_modules = {"rnn": self.rnn, "char_embeddings": self.char_embeddings, "optim": self.optim,
                                   "output_classifier": self.output_classifier}
-            logging.info("get the parameters of the imported tokenizer")
+            print("get the parameters of the imported tokenizer")
 
         # load the model
         if args.load_from is not None:
             checkpoint = torch.load(CHECKPOINTS + args.load_from + ".pth.tar")
             for name, module in self.named_modules.items():
                 module.load_state_dict(checkpoint[name])
-                logging.info("load ", name)
-            logging.info("load parameters and weights....")
+                print("load ", name)
+            print("load parameters and weights....")
 
         # after loading parameters from the language model, set the dictionary to save all parameters
         self.named_modules = {"rnn": self.rnn, "char_embeddings": self.char_embeddings, "optim": self.optim,
@@ -320,23 +320,31 @@ def save_log(mode="w"):
         print("", file=outFile)
         print("save log file to ", args.save_to)
 
+def remove_dot(lines):  # new line included
 
-import preprocess
+    pattern = re.compile(u'[^|\nกขฃคฅฆงจฉชซฌญฐฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืุูเแโใไๅๆ็่้๊๋์ํ ]')
+    lines = re.sub(pattern, "", lines)
 
-# load and preprocess original BEST corpus
-def load_data_classifier(path, num_lines_per_chunk, doShuffling=True, not_include_dot=False):
+    return lines
+
+
+def load_data_classifier(path, num_lines_per_chunk, doShuffling=True, ignore_dot=True):
     chunks = []
     with open(path, "r") as inFile:
         for line in inFile:
-            line = line.strip()
-            line = preprocess.preprocess(line)
-            words = line.split("|")
-            logging.info(words)
+            if ignore_dot:
+                line = remove_dot(line)
+
+            words = line.split()
+
             chunks.append(words)
+
             if len(chunks) >= num_lines_per_chunk:
                 if doShuffling:
                     random.shuffle(chunks)
+                    # print("shuffle data")
                 chunks = list(chain(*chunks))
+
                 yield chunks
                 chunks = []
     chunks = list(chain(*chunks))
@@ -358,11 +366,11 @@ if start_training:
     trainLosses = []
     devLosses = []
     for epoch in range(args.epoch):
-        logging.info("epoch: ", epoch + 1)
+        print("epoch: ", epoch + 1)
         training_data_CL = load_data_classifier(train_path, num_lines_per_chunk=args.len_lines_per_chunk,
-                                                doShuffling=True, not_include_dot=no_dot)
-        logging.info("Got the training data")
-        logging.info("train: ", train_path)
+                                                doShuffling=True, ignore_dot=no_dot)
+        print("Got the training data")
+        print("train: ", train_path)
         training_chars = create_tensor_classifier(training_data_CL)
 
         model.rnn.train(True)
@@ -376,7 +384,7 @@ if start_training:
             try:
                 numeric = next(training_chars)
             except StopIteration:
-                logging.info("end of the batch")
+                print("end of the batch")
                 break
             loss, charCounts, _, _, _ = model.forward_cl(numeric, train=True)  # training
             if epoch == 0:
@@ -387,10 +395,10 @@ if start_training:
             trainChars += charCounts
 
         trainLosses.append(train_loss_ / trainChars)
-        logging.info("trainLosses ", trainLosses)
+        print("trainLosses ", trainLosses)
 
         if save_weights:
-            logging.info("save model parameters... ", args.save_to)
+            print("save model parameters... ", args.save_to)
             torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]),
                        CHECKPOINTS_TOKENIZER + args.save_to + ".pth.tar")
 
@@ -398,8 +406,8 @@ if start_training:
         dev_data_CL = load_data_classifier(dev_path, num_lines_per_chunk=args.len_lines_per_chunk, doShuffling=False,
                                           not_include_dot=no_dot)
 
-        logging.info("Got dev data")
-        logging.info("dev path: ", dev_path)
+        print("Got dev data")
+        print("dev path: ", dev_path)
         dev_chars = create_tensor_classifier(dev_data_CL)
         dev_loss = 0
         dev_char_count = 0
@@ -418,7 +426,7 @@ if start_training:
                 count_dev_samples += args.batchSize
 
         devLosses.append(dev_loss / dev_char_count)
-        logging.info("dev losses ", devLosses)
+        print("dev losses ", devLosses)
         num_epoch = epoch
 
         if args.load_from is None or str(args.load_from)[:2] == "LM":
@@ -428,7 +436,7 @@ if start_training:
         elif str(args.load_from)[:2] == "To" and epoch >= args.epoch - 1:
             save_log("a")
         if len(devLosses) > 1 and devLosses[-1] >= devLosses[-2]:
-            logging.info("early stopping")
+            print("early stopping")
             save_log("a")
             break
 
@@ -457,13 +465,13 @@ def test():
     word_correct = 0
 
     model.rnn.train(False)
-    logging.info("testing......")
+    print("testing......")
 
     test_data_CL = load_data_classifier(test_path, num_lines_per_chunk=args.len_lines_per_chunk, doShuffling=False,
                                         not_include_dot=no_dot)
 
-    logging.info("Got test data")
-    logging.info("test path: ", test_path)
+    print("Got test data")
+    print("test path: ", test_path)
 
     test_chars = create_tensor_classifier(test_data_CL)
 
@@ -520,113 +528,113 @@ def test():
                     count_real_word += 1
 
             if printAllPrediction and "".join(chars) != "".join(pred_seq):
-                logging.info("".join(chars))
-                logging.info("".join(pred_seq))
+                print("".join(chars))
+                print("".join(pred_seq))
 
         if printPrediction and "".join(chars) != "".join(pred_seq):
-            logging.info("".join(chars))
-            logging.info("".join(pred_seq))
+            print("".join(chars))
+            print("".join(pred_seq))
 
-    logging.info("train losses ", trainLosses)
-    logging.info("dev losses ", devLosses)
+    print("train losses ", trainLosses)
+    print("dev losses ", devLosses)
 
     if (correct + falsePositives) == 0:
 
-        logging.info("correct ", correct)
-        logging.info(total_time)
+        print("correct ", correct)
+        print(total_time)
 
     else:
-        logging.info(total_time)
+        print(total_time)
 
         precision = correct / (correct + falsePositives)
         recall = correct / (correct + falseNegatives)
 
         f1 = 2 * (precision * recall) / (precision + recall)
-        logging.info("falseNegatives ", falseNegatives)
-        logging.info("falsePositives ", falsePositives)
-        logging.info("correct ", correct)
+        print("falseNegatives ", falseNegatives)
+        print("falsePositives ", falsePositives)
+        print("correct ", correct)
 
-        logging.info("Boundary measures", "Precision", round(precision * 100, 2), "Recall", round(recall * 100, 2), "F1",
+        print("Boundary measures", "Precision", round(precision * 100, 2), "Recall", round(recall * 100, 2), "F1",
               round(f1 * 100, 2))
 
         word_precision = word_correct / (count_predict_word)
         word_recall = word_correct / (count_real_word)
         word_f1 = 2 * (word_precision * word_recall) / (word_precision + word_recall)
-        logging.info("word_correct :", word_correct)
-        logging.info("count_predict_word: ", count_predict_word)
-        logging.info("count_real_word: ", count_real_word)
-        logging.info("Word measures", "Precision", round(word_precision * 100, 2), "Recall", round(word_recall * 100, 2), "F1",
+        print("word_correct :", word_correct)
+        print("count_predict_word: ", count_predict_word)
+        print("count_real_word: ", count_real_word)
+        print("Word measures", "Precision", round(word_precision * 100, 2), "Recall", round(word_recall * 100, 2), "F1",
               round(word_f1 * 100, 2))
 
-        logging.info("".join(chars))
-        logging.info("".join(pred_seq))
+        print("".join(chars))
+        print("".join(pred_seq))
 
         with open(CHECKPOINTS_TOKENIZER + args.save_to, "a") as outFile:
 
-            logging.info("falseNegatives ", falseNegatives, file=outFile)
-            logging.info("falsePositives ", falsePositives, file=outFile)
-            logging.info("correct ", correct, file=outFile)
+            print("falseNegatives ", falseNegatives, file=outFile)
+            print("falsePositives ", falsePositives, file=outFile)
+            print("correct ", correct, file=outFile)
 
-            logging.info("Boundary measures: ", file=outFile)
-            logging.info("Precision", precision, "Recall", recall, "F1",
+            print("Boundary measures: ", file=outFile)
+            print("Precision", precision, "Recall", recall, "F1",
                   2 * (precision * recall) / (precision + recall), file=outFile)
-            logging.info("\nWord measures", "Precision", word_precision, "Recall", word_recall, "F1",
+            print("\nWord measures", "Precision", word_precision, "Recall", word_recall, "F1",
                   2 * (word_precision * word_recall) / (word_precision + word_recall), file=outFile)
-            logging.info("word_correct :", word_correct, file=outFile)
-            logging.info("count_predict_word: ", count_predict_word, file=outFile)
-            logging.info("count_real_word: ", count_real_word, file=outFile)
+            print("word_correct :", word_correct, file=outFile)
+            print("count_predict_word: ", count_predict_word, file=outFile)
+            print("count_real_word: ", count_real_word, file=outFile)
 
-            logging.info("", file=outFile)
-            logging.info("".join(chars), file=outFile)
-            logging.info("".join(pred_seq), file=outFile)
-            logging.info(total_time, file=outFile)
+            print("", file=outFile)
+            print("".join(chars), file=outFile)
+            print("".join(pred_seq), file=outFile)
+            print(total_time, file=outFile)
 
     with open(CHECKPOINTS_TOKENIZER + "tokenizer_result.csv", "a") as table:
-        logging.info("---------save results------")
-        logging.info("-", file=table, end=';')
+        print("---------save results------")
+        print("-", file=table, end=';')
         if str(args.load_from)[:2] == "LM":
-            logging.info("LM", file=table, end=';')
+            print("LM", file=table, end=';')
         else:
-            logging.info("-", file=table, end=';')
+            print("-", file=table, end=';')
 
-        logging.info(args.save_to, file=table, end=';')
-        logging.info(args.dataset, file=table, end=';')
+        print(args.save_to, file=table, end=';')
+        print(args.dataset, file=table, end=';')
 
-        logging.info("boundary", file=table, end=';')
+        print("boundary", file=table, end=';')
         precision = round(precision * 100, 2)
         recall = round(recall * 100, 2)
         f1 = round(f1 * 100, 2)
 
-        logging.info(precision, file=table, end=';')
-        logging.info(recall, file=table, end=';')
-        logging.info(f1, file=table, end=';')
+        print(precision, file=table, end=';')
+        print(recall, file=table, end=';')
+        print(f1, file=table, end=';')
 
-        logging.info("word", file=table, end=';')
+        print("word", file=table, end=';')
         word_precision = round(word_precision * 100, 2)
         word_recall = round(word_recall * 100, 2)
         word_f1 = round(word_f1 * 100, 2)
 
-        logging.info(word_precision, file=table, end=';')
-        logging.info(word_recall, file=table, end=';')
-        logging.info(word_f1, file=table, end=';')
+        print(word_precision, file=table, end=';')
+        print(word_recall, file=table, end=';')
+        print(word_f1, file=table, end=';')
 
-        logging.info(num_epoch+1, file=table, end=';')
-        logging.info(total_time, file=table, end=';')
+        print(num_epoch+1, file=table, end=';')
+        print(total_time, file=table, end=';')
 
-        logging.info("trainLosses ", trainLosses, file=table, end=';')
-        logging.info("devLosses ", devLosses, file=table, end=';')
-        logging.info(args.add_note, file=table, end=';')
+        print("trainLosses ", trainLosses, file=table, end=';')
+        print("devLosses ", devLosses, file=table, end=';')
+        print(args.add_note, file=table, end=';')
         p = util.get_param(str(args))
-        logging.info(p, file=table, end=';')
+        print(p, file=table, end=';')
         long, short = util.get_command(str(args))
         p = "python Tokenizer.py "
         long = p + long
-        logging.info(long, file=table, end='\n')
+        print(long, file=table, end='\n')
 
 
 end = timer()
 total_time = timedelta(seconds=end - start)
-logging.info(timedelta(seconds=end - start))
+print(timedelta(seconds=end - start))
 test()
-logging.info(args.save_to)
-logging.info(args.add_note)
+print(args.save_to)
+print(args.add_note)

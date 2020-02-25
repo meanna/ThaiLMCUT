@@ -1,7 +1,8 @@
 import torch
 from torch.autograd import Variable
 
-from .data_LM import itos
+#from .data_LM import itos
+from data_LM import itos
 
 hidden = None
 

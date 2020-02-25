@@ -11,7 +11,6 @@ def load_args(args_path):
 
 
 def export_args(args_dict, save_path):
-    # with open(CHECKPOINTS_TOKENIZER + args.save_to + ".json", "w") as config:
     with open(save_path + ".json", "w") as config:
         json.dump(args_dict, config)
         print("json")
@@ -72,11 +71,6 @@ def get_param(param):
     p = "".join(p)
     p = re.sub(r'--save_to', "--load_from", p)
     return p
-
-
-# s = "Namespace(batchSize=128, char_dropout_prob=0.01, char_embedding_size=100, char_noise_prob=0.1, dataset_size='small', epoch=1, hidden_dim=100, layer_num=2, learning_rate=0.1, load_from=None, lr_decay=0.5, myID='2019-05-17_18.33.18', sequence_length=80, verbose=False, weight_dropout_hidden=0.0, weight_dropout_in=0.0"
-# p = get_param(s)
-# print(p)
 
 
 def get_param2(param):
