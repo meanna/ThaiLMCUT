@@ -9,9 +9,9 @@ stoi = {k:v for k,v in enumerate(itos)}
 cuda = torch.cuda.is_available()
 
 # create batches
-def _prepareDatasetChunks(args, data):
+def prepareDatasetChunks(args, data):
     count = 0
-    print("Prepare chunks")
+    print("creating batches...")
     numerified = []
     for chunk in data:
         for char in chunk:

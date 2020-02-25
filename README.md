@@ -49,12 +49,15 @@ Result will be a list of tokens:
 
 Define the training and development dataset in `train/get_corpus_lm.py`
 See expected input in `data/news_00001.txt`
-run
-```
-python train/LanguageModel.py
-```
 
-
+To train a new language model, you could run:
+```
+python train/LanguageModel.py --dataset [dataset name] --batchSize 60  --char_dropout_prob 0.01  --char_embedding_size 200   --hidden_dim 500  --layer_num 3  --learning_rate 0.0001 --sequence_length 100  --epoch 20 --len_lines_per_chunk 1000 --optim [adam or sgd] --lstm_num_direction [2 for bidirectional LSTM]  --add_note "..add some note.."
+```
+To resume the training of a language model, you could run
+```
+python train/LanguageModel.py   `--load_from [model name]`  --dataset [dataset name]  --learning_rate 0.0001 --epoch 20  --optim [adam or sgd] --add_note "..add some note.."
+```
 
 ### Train a new tokenizer
 
