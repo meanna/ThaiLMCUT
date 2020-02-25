@@ -29,6 +29,8 @@ pip install dist/lmcut*
 
 # How to use
 
+### Tokenize a given Thai text
+
 After importing the package, you can tokenize any Thai text by using:
 ```
 from lmcut import tokenize
@@ -41,6 +43,21 @@ Result will be a list of tokens:
 ```
 ['โรง', 'แรม', 'ดี', 'สวยงาม', 'น่า', 'อยู่', 'มาก', 'ๆ']
 ```
+
+
+### Train a language model
+
+```
+
+```
+
+
+
+### Train a new tokenizer
+
+
+* news_00001.txt in the `data` folder is from InterBEST2009 corpus which is publicly available at [NECTEC](https://www.nectec.or.th/corpus/index.php?league=pm)
+
 
 # License
 
