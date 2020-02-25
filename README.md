@@ -9,10 +9,20 @@ ThaiLMCut - Deep Learning Tokenizer for the Thai language
 
 # How to setup
 
-## Create a package wheel using:
+### Download the weight file from:
+```
+https://drive.google.com/file/d/1e39tNMfUFzYQ4MDHTMyNWfNUxu9RoaTA/view?usp=sharing
+```
+
+### Move the weight file to this path:
+```
+lmcut/weight/.
+```
+
+### Create a package wheel using:
 ```python setup.py bdist_wheel```
 
-## Install it using:
+### Install the package using:
 ```
 pip install dist/lmcut*
 ```
