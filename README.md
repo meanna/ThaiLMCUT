@@ -47,8 +47,11 @@ Result will be a list of tokens:
 
 ### Train a language model
 
+Define the training and development dataset in `train/get_corpus_lm.py`
+See expected input in `data/news_00001.txt`
+run
 ```
-
+python train/LanguageModel.py
 ```
 
 
