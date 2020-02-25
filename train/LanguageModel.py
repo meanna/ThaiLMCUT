@@ -284,7 +284,7 @@ if train:
             print("save model parameters... ")
             torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]),
                        save_path)
-            save_csv(f= "LM_log_temp.csv")
+            save_csv(f="LM_log_temp.csv")
 
         model.rnn.train(False)
 
