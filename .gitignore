@@ -137,4 +137,3 @@ dmypy.json
 # package specific ignores
 #./checkpoints_LM/*
 #./checkpoints_tokenizer/*
-.train/test/*
