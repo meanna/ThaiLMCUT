@@ -1,3 +1,6 @@
+# sample command
+# python LanguageModel.py --epoch 5 --lstm_num_direction 2 --batchSize 30 --sequence_length 80 --char_embedding_size 100 --hidden_dim 60 --layer_num 2
+
 import argparse
 import math
 import time
@@ -9,10 +12,10 @@ import os
 import torch
 from torch.autograd import Variable
 
-import get_corpus_lm, util, data_LM
+from get_corpus import *
+import util, data_LM
 from set_path import CHECKPOINTS_LM
 from data_LM import itos, prepareDatasetChunks
-
 
 start = timer()
 timestr = time.strftime("%Y-%m-%d_%H.%M.%S")
@@ -56,13 +59,12 @@ parser.add_argument("--add_note", type=str)
 args = parser.parse_args()
 args_dict = vars(args)
 
-
 train = True
 print()
 if args.load_from is None:
     print("===========start training a language model===========")
 else:
-    print("===========resume the training of "+str(args.load_from)+"===========")
+    print("===========resume the training of " + str(args.load_from) + "===========")
     json_path = os.path.join(CHECKPOINTS_LM, args.load_from)
     args_dict = util.load_args(json_path)
     args.char_embedding_size = args_dict["char_embedding_size"]
@@ -73,12 +75,12 @@ else:
     args.batchSize = args_dict["batchSize"]
     args.lstm_num_direction = args_dict["lstm_num_direction"]
     args.len_lines_per_chunk = args_dict["len_lines_per_chunk"]
-    #args.optim = args_dict["optim"]
+    # args.optim = args_dict["optim"]
     print("set up the network structure...")
 
 # set a default note
 if args.add_note is None:
-    args.add_note = str(args.dataset)+ " , "+ str(args.learning_rate)+ ", epoch "+ str(args.epoch)
+    args.add_note = str(args.dataset) + " , " + str(args.learning_rate) + ", epoch " + str(args.epoch)
 print("note: ", args.add_note)
 
 dataset = args.dataset
@@ -90,13 +92,14 @@ if args.load_from is not None and args.over_write == 1:
     print("overwrite new weights to the resumed model")
     args.save_to = args.load_from
 
-print("model name: " , args.save_to)
+print("model name: ", args.save_to)
 cuda = torch.cuda.is_available()
 print("GPU: ", torch.cuda.is_available())
 
-save_path = os.path.join( CHECKPOINTS_LM,args.save_to + ".pth.tar")
+save_path = os.path.join(CHECKPOINTS_LM, args.save_to + ".pth.tar")
 log_path = os.path.join(CHECKPOINTS_LM, args.save_to)
 util.export_args(args_dict, log_path)
+
 
 class Model:
     """
@@ -225,9 +228,10 @@ def save_log(mode="w"):
         print("", file=outFile)
         print("save log file to ", args.save_to)
 
+
 # append the result to "LM_log.csv"
-def save_csv(f= "LM_log.csv"):
-    csv_path = os.path.join(CHECKPOINTS_LM,f)
+def save_csv(f="LM_log.csv"):
+    csv_path = os.path.join(CHECKPOINTS_LM, f)
     with open(csv_path, "a+") as table:
         print(args.save_to, file=table, end=';')
         print(args.dataset, file=table, end=';')
@@ -244,10 +248,10 @@ def save_csv(f= "LM_log.csv"):
 
 
 # model training
-num_epoch=1
+num_epoch = 1
 if train:
     model = Model(bi_lstm)
-    train_path, dev_path, test_path = get_corpus_lm.get_path_data(dataset)
+    train_path, dev_path, test_path = get_path_data_LM(dataset)
     if cuda:
         zeroBeginning = torch.LongTensor([2 for _ in range(args.batchSize)]).cuda().view(1, args.batchSize)
     else:
@@ -262,7 +266,7 @@ if train:
     for epoch in range(args.epoch):
         print()
         print("epoch: ", epoch + 1)
-        training_data = get_corpus_lm.load(train_path, doShuffling=True, len_chunk=args.len_lines_per_chunk)
+        training_data = load_data_LM(train_path, doShuffling=True, len_chunk=args.len_lines_per_chunk)
         print("Got the training data from ", train_path)
         training_chars = prepareDatasetChunks(args, training_data)
 
@@ -297,7 +301,7 @@ if train:
 
         model.rnn.train(False)
 
-        dev_data = get_corpus_lm.load(dev_path, len_chunk=args.len_lines_per_chunk, doShuffling=False)
+        dev_data = load_data_LM(dev_path, len_chunk=args.len_lines_per_chunk, doShuffling=False)
         print("Got the development data from ", dev_path)
         dev_chars = prepareDatasetChunks(args, dev_data)
 
@@ -327,7 +331,7 @@ if train:
         if len(devLosses) > 1 and devLosses[-1] >= devLosses[-2]:
             print("early stopping applied")
             with open(CHECKPOINTS_LM + args.save_to, "a") as outFile:
-                print("early stopping applied",  file=outFile)
+                print("early stopping applied", file=outFile)
             break
 
         end = timer()
@@ -336,7 +340,7 @@ if train:
             print("saving the model... ")
             torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]),
                        save_path)
-            save_csv(f= "LM_log_temp.csv")
+            save_csv(f="LM_log_temp.csv")
 
         if args.optim == "adam" and adam_with_lr_decay:
             learning_rate = args.learning_rate * math.pow(args.adam_lr_decay, len(devLosses))
@@ -352,5 +356,5 @@ print()
 print("time usage: ", timedelta(seconds=end - start))
 save_csv()
 print("append the result to LM_log.csv")
-print("log file: ", log_path )
+print("log file: ", log_path)
 print("model name: ", args.save_to)
