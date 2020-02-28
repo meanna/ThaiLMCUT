@@ -3,23 +3,22 @@
 
 import argparse
 import math
-import time
 import random
+import os
+import time
 from timeit import default_timer as timer
 from datetime import timedelta
-import os
 
 import torch
 from torch.autograd import Variable
 
 from get_corpus import *
-import util, data_LM
+import util
 from set_path import CHECKPOINTS_LM
-from data_LM import itos, prepareDatasetChunks
+from data_util import *
 
 start = timer()
 timestr = time.strftime("%Y-%m-%d_%H.%M.%S")
-
 parser = argparse.ArgumentParser()
 
 # model name and imported model
@@ -92,6 +91,8 @@ if args.load_from is not None and args.over_write == 1:
     print("overwrite new weights to the resumed model")
     args.save_to = args.load_from
 
+print(args)
+print()
 print("model name: ", args.save_to)
 cuda = torch.cuda.is_available()
 print("GPU: ", torch.cuda.is_available())
@@ -293,6 +294,7 @@ if train:
         trainLosses.append(train_loss_ / trainChars)
         print("train losses ", trainLosses)
 
+        #append training result in csv file
         if True:
             print("saving the model... ")
             torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]),
@@ -307,10 +309,8 @@ if train:
 
         dev_loss = 0
         dev_char_count = 0
-        counter = 0
         hidden, beginning = None, None
         while True:
-            counter += 1
             try:
                 numeric = next(dev_chars)
             except StopIteration:

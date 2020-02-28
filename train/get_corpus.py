@@ -36,11 +36,9 @@ def get_path_data_LM(dataset="default"):
 def get_path_data_tokenizer(dataset="default"):
 
     if dataset == "default":
-        file_name = "encyclopedia_00093.txt"
-        #file_name = "poem.txt"
-        train_path = os.path.join(HOME,"data", file_name)
-        dev_path =os.path.join(HOME,"data", file_name)
-        test_path = ""
+        train_path = os.path.join(HOME,"data", "news_00001.txt")
+        dev_path = os.path.join(HOME,"data", "news_00001.txt")
+        test_path = os.path.join(HOME, "data", "news_00001.txt")
 
     else:
         raise AssertionError("the given dataset name is wrong :",dataset )
@@ -121,7 +119,7 @@ def load_data_LM(path_corpus, doShuffling=False, len_chunk=100):
 
 # input: BEST2009
 # output: a generator of lists of words
-def load_data_tokenizer(path,doShuffling=True,len_chunk=100):
+def load_data_tokenizer(path, doShuffling=True, len_chunk=100):
     chunks = []
     with open(path, "r") as inFile:
         for line in inFile:

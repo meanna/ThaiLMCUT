@@ -1,24 +1,28 @@
+# sample command
+#python Tokenizer.py --epoch 5 --lstm_num_direction 2 --batchSize 30 --sequence_length 80 --char_embedding_size 100 --hidden_dim 60 --layer_num 2 --optim adam --learning_rate 0.0001
+
 import argparse
-import torch
 import math
-import time
 import random
-from torch.autograd import Variable
-import data_LM
-import get_corpus_tokenizer, util
-from itertools import chain
+import os
+import time
 from timeit import default_timer as timer
 from datetime import timedelta
+
+import torch
+from torch.autograd import Variable
+
+from data_util import *
+from get_corpus import *
+import util
 from set_path import CHECKPOINTS_LM, CHECKPOINTS_TOKENIZER
-import re
-
-
 
 timestr = time.strftime("%Y-%m-%d_%H.%M.%S")
-
 start = timer()
-
 parser = argparse.ArgumentParser()
+
+
+# model name and imported model
 parser.add_argument("--load_from", type=str)
 parser.add_argument("--save_to", type=str, default="Tokenizer_" + timestr)
 
@@ -37,7 +41,7 @@ parser.add_argument("--char_dropout_prob", type=float, default=random.choice([0.
 parser.add_argument("--clip_grad", type=float, default=0.5)
 
 # training parameters
-parser.add_argument("--learning_rate", type=float, default=1)
+parser.add_argument("--learning_rate", type=float, default=0.01)
 parser.add_argument("--optim", type=str, default="adam")  # sgd or adam
 parser.add_argument("--sgd_momentum", type=float, default=0.02)  # 0.02, 0.9
 parser.add_argument("--adam_lr_decay", type=float, default=0.00)
@@ -49,22 +53,20 @@ parser.add_argument("--dataset", type=str, default="default")  # small, big, ful
 parser.add_argument("--len_lines_per_chunk", type=int, default=100)
 
 # log file parameters
-parser.add_argument("--save_weight", type=int, default=0) # 1 for saving weight, 0 otherwise
+parser.add_argument("--save_model", type=int, default=1)  # 1 for saving weight, 0 otherwise
 # if resume the training, 1 for overwrite the weights to the same model, 0 for saving a new model
 parser.add_argument("--over_write", type=int, default=0)
 parser.add_argument("--add_note", type=str)
 
-# 1 if include fullstops(dot) in the text input, 0 otherwise
-parser.add_argument("--with_dot", type=int, default=0)
 # 1 for printing the output during test time
 parser.add_argument("--printPrediction", type=int, default=0)
 
 args = parser.parse_args()
 args_dict = vars(args)
-
+save_path = os.path.join(CHECKPOINTS_TOKENIZER, args.save_to + ".pth.tar")
+log_path = os.path.join(CHECKPOINTS_TOKENIZER, args.save_to)
 
 start_training = True
-
 # if resume the training
 if args.load_from is not None:
     if str(args.load_from)[:9] == "Tokenizer":
@@ -81,7 +83,8 @@ if args.load_from is not None:
 
     # get the network structure from the loaded model
     if True:
-        args_dict = util._load_args(CHECKPOINTS + args.load_from)
+        imported_model = os.path.join(CHECKPOINTS_TOKENIZER, args.load_from)
+        args_dict = util.load_args(imported_model)
         args.char_embedding_size = args_dict["char_embedding_size"]
         args.hidden_dim = args_dict["hidden_dim"]
         args.layer_num = args_dict["layer_num"]
@@ -97,34 +100,29 @@ if args.load_from is not None:
 
 # set the default note
 if args.add_note is None:
-    args.add_note = "load from "+ str(args.load_from)+" , "+str(args.dataset)+ " , lr "+ str(args.learning_rate)+ ", epoch "+ str(args.epoch)
+    args.add_note = "load from " + str(args.load_from) + " , " + str(args.dataset) + " , lr " + str(
+        args.learning_rate) + ", epoch " + str(args.epoch)
 
+print()
 print(args)
-print("save to ", args.save_to)
+print()
+print("model name: ", args.save_to)
 
-no_dot = args.with_dot == 0
-print("remove fullstops from the input data ", no_dot)
-save_weights = args.save_weight == 1
+save_weights = args.save_model == 1
 bi_lstm = args.lstm_num_direction == 2
 adam_with_lr_decay = args.adam_lr_decay != 0
 
 cuda = torch.cuda.is_available()
-print("cuda....,", torch.cuda.is_available())
+print("GPU: ", torch.cuda.is_available())
 
 # print the last tokenization output for every batch
 printPrediction = args.printPrediction == 1
 printAllPrediction = False
 
-print("train for ", args.epoch, " epoch")
-util.export_args(args_dict, CHECKPOINTS_TOKENIZER + args.save_to)
-print("export parameters as json")
 
-# ------------------ define vocabulary----------------
-stoi = data_LM.stoi  # dictionary for character-id mapping
-itos = data_LM.itos  # list of Thai characters
+util.export_args(args_dict, log_path)
 
-train_path, dev_path, test_path = get_corpus_tokenizer.get_path_data(args.dataset)
-
+train_path, dev_path, test_path = get_path_data_tokenizer(args.dataset)
 class Model:
     """
     define the model and download weights if available.
@@ -170,15 +168,13 @@ class Model:
         else:
             self.named_modules = {"rnn": self.rnn, "char_embeddings": self.char_embeddings, "optim": self.optim,
                                   "output_classifier": self.output_classifier}
-            print("get the parameters of the imported tokenizer")
+
 
         # load the model
         if args.load_from is not None:
-            checkpoint = torch.load(CHECKPOINTS + args.load_from + ".pth.tar")
+            checkpoint = torch.load(imported_model + ".pth.tar")
             for name, module in self.named_modules.items():
                 module.load_state_dict(checkpoint[name])
-                print("load ", name)
-            print("load parameters and weights....")
 
         # after loading parameters from the language model, set the dictionary to save all parameters
         self.named_modules = {"rnn": self.rnn, "char_embeddings": self.char_embeddings, "optim": self.optim,
@@ -219,6 +215,7 @@ class Model:
         torch.nn.utils.clip_grad_value_(self.parameters_cached, clip_value=args.clip_grad)
         self.optim.step()
 
+
 # create batches
 def create_tensor_classifier(generator_chunks):
     target_list = []
@@ -242,22 +239,20 @@ def create_tensor_classifier(generator_chunks):
         target_tensor = target_list[:cutoff]
         target_list = target_list[cutoff:]
         if cuda:
-            input_tensor = torch.LongTensor(input_tensor).view(args.batchSize, -1, args.sequence_length).transpose(0,
-                                                                                                                   1).transpose(
-                1,
-                2).cuda()
-            target_tensor = torch.LongTensor(target_tensor).view(args.batchSize, -1, args.sequence_length).transpose(0,
-                                                                                                                     1).transpose(
-                1, 2).cuda()
+            input_tensor = torch.LongTensor(input_tensor)\
+                .view(args.batchSize, -1, args.sequence_length)\
+                .transpose(0,1).transpose(1,2).cuda()
+            target_tensor = torch.LongTensor(target_tensor)\
+                .view(args.batchSize, -1, args.sequence_length)\
+                .transpose(0,1).transpose(1, 2).cuda()
 
         else:
-            input_tensor = torch.LongTensor(input_tensor).view(args.batchSize, -1, args.sequence_length).transpose(0,
-                                                                                                                   1).transpose(
-                1,
-                2)
-            target_tensor = torch.LongTensor(target_tensor).view(args.batchSize, -1, args.sequence_length).transpose(0,
-                                                                                                                     1).transpose(
-                1, 2)
+            input_tensor = torch.LongTensor(input_tensor)\
+                .view(args.batchSize, -1, args.sequence_length)\
+                .transpose(0,1).transpose(1,2)
+            target_tensor = torch.LongTensor(target_tensor)\
+                .view(args.batchSize, -1, args.sequence_length)\
+                .transpose(0,1).transpose(1, 2)
 
         numberOfSequences = input_tensor.size()[0]
 
@@ -266,7 +261,7 @@ def create_tensor_classifier(generator_chunks):
 
 # save log file
 def save_log(mode="w"):
-    with open(CHECKPOINTS_TOKENIZER + args.save_to, mode) as outFile:
+    with open(log_path, mode) as outFile:
         if mode == "a":
             print("----------resume training/early stopping ---------", file=outFile)
         else:
@@ -318,43 +313,16 @@ def save_log(mode="w"):
         p = util.get_param(str(args))
         print(p, file=outFile)
         print("", file=outFile)
-        print("save log file to ", args.save_to)
-
-def remove_dot(lines):  # new line included
-
-    pattern = re.compile(u'[^|\nกขฃคฅฆงจฉชซฌญฐฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืุูเแโใไๅๆ็่้๊๋์ํ ]')
-    lines = re.sub(pattern, "", lines)
-
-    return lines
-
-
-def load_data_classifier(path, num_lines_per_chunk, doShuffling=True, ignore_dot=True):
-    chunks = []
-    with open(path, "r") as inFile:
-        for line in inFile:
-            if ignore_dot:
-                line = remove_dot(line)
-
-            words = line.split()
-
-            chunks.append(words)
-
-            if len(chunks) >= num_lines_per_chunk:
-                if doShuffling:
-                    random.shuffle(chunks)
-                    # print("shuffle data")
-                chunks = list(chain(*chunks))
-
-                yield chunks
-                chunks = []
-    chunks = list(chain(*chunks))
-    yield chunks
 
 # train the tokenizer
 num_epoch = 1
 if start_training:
+    print("\n start training...")
     model = Model(bi_lstm)
-    train_path, dev_path, test_path = get_corpus_tokenizer.get_path_data(args.dataset)
+    train_path, dev_path, test_path = get_path_data_tokenizer(args.dataset)
+    print("train data from ", train_path)
+    print("dev data from ", dev_path)
+    print("test data from ", test_path)
     logsoftmax = torch.nn.LogSoftmax(dim=2)
     classifier_loss = torch.nn.CrossEntropyLoss()
     char_dropout = torch.nn.Dropout2d(p=args.char_dropout_prob)
@@ -366,11 +334,12 @@ if start_training:
     trainLosses = []
     devLosses = []
     for epoch in range(args.epoch):
+        print()
         print("epoch: ", epoch + 1)
-        training_data_CL = load_data_classifier(train_path, num_lines_per_chunk=args.len_lines_per_chunk,
-                                                doShuffling=True, ignore_dot=no_dot)
-        print("Got the training data")
-        print("train: ", train_path)
+        training_data_CL = load_data_tokenizer(train_path,
+                                               len_chunk=args.len_lines_per_chunk,
+                                               doShuffling=True
+                                               )
         training_chars = create_tensor_classifier(training_data_CL)
 
         model.rnn.train(True)
@@ -384,7 +353,6 @@ if start_training:
             try:
                 numeric = next(training_chars)
             except StopIteration:
-                print("end of the batch")
                 break
             loss, charCounts, _, _, _ = model.forward_cl(numeric, train=True)  # training
             if epoch == 0:
@@ -395,19 +363,18 @@ if start_training:
             trainChars += charCounts
 
         trainLosses.append(train_loss_ / trainChars)
-        print("trainLosses ", trainLosses)
+        print("train losses ", trainLosses)
 
         if save_weights:
             print("save model parameters... ", args.save_to)
             torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]),
-                       CHECKPOINTS_TOKENIZER + args.save_to + ".pth.tar")
+                       save_path)
 
         model.rnn.train(False)
-        dev_data_CL = load_data_classifier(dev_path, num_lines_per_chunk=args.len_lines_per_chunk, doShuffling=False,
-                                          not_include_dot=no_dot)
-
-        print("Got dev data")
-        print("dev path: ", dev_path)
+        dev_data_CL = load_data_tokenizer(dev_path,
+                                           len_chunk=args.len_lines_per_chunk,
+                                           doShuffling=False,
+                                           )
         dev_chars = create_tensor_classifier(dev_data_CL)
         dev_loss = 0
         dev_char_count = 0
@@ -448,10 +415,10 @@ if start_training:
             optim = torch.optim.SGD(model.parameters(model.modules), lr=learning_rate,
 
                                     momentum=args.sgd_momentum)  # 0.02, 0.9
+        print()
 
 
 def test():
-
     global model
     count_test_samples = 0
 
@@ -463,27 +430,24 @@ def test():
     word_label = []
     word_pred = []
     word_correct = 0
+    precision = 0
 
     model.rnn.train(False)
     print("testing......")
 
-    test_data_CL = load_data_classifier(test_path, num_lines_per_chunk=args.len_lines_per_chunk, doShuffling=False,
-                                        not_include_dot=no_dot)
-
-    print("Got test data")
-    print("test path: ", test_path)
-
+    test_data_CL = load_data_tokenizer(test_path,
+                                        len_chunk=args.len_lines_per_chunk,
+                                        doShuffling=False,
+                                        )
     test_chars = create_tensor_classifier(test_data_CL)
 
-    counter = 0
     while True:
-        counter += 1
         try:
             numeric = next(test_chars)
         except StopIteration:
             break
 
-        loss, numberOfCharacters, log_probs_cal, input_tensor_cal, target_tensor_cal = model._forward(numeric,
+        loss, numberOfCharacters, log_probs_cal, input_tensor_cal, target_tensor_cal = model.forward_cl(numeric,
                                                                                                       train=False)
         count_test_samples += args.batchSize
         tag_score = log_probs_cal
@@ -538,38 +502,41 @@ def test():
     print("train losses ", trainLosses)
     print("dev losses ", devLosses)
 
-    if (correct + falsePositives) == 0:
+    print()
+    print("============Evaluation===========")
+    print()
 
-        print("correct ", correct)
-        print(total_time)
-
+    if correct == 0:
+        print("correct predicted boundaries ", correct)
+        print("correct predicted words ",word_correct)
     else:
-        print(total_time)
-
         precision = correct / (correct + falsePositives)
         recall = correct / (correct + falseNegatives)
 
         f1 = 2 * (precision * recall) / (precision + recall)
-        print("falseNegatives ", falseNegatives)
-        print("falsePositives ", falsePositives)
-        print("correct ", correct)
+        print("Boundary Measure")
+        print("False Negatives ", falseNegatives)
+        print("False Positives ", falsePositives)
+        print("Correctly predicted boundaries", correct)
 
-        print("Boundary measures", "Precision", round(precision * 100, 2), "Recall", round(recall * 100, 2), "F1",
+        print("Precision", round(precision * 100, 2), "Recall", round(recall * 100, 2), "F1",
               round(f1 * 100, 2))
-
+        print()
+        print("Word Measure")
         word_precision = word_correct / (count_predict_word)
         word_recall = word_correct / (count_real_word)
         word_f1 = 2 * (word_precision * word_recall) / (word_precision + word_recall)
-        print("word_correct :", word_correct)
-        print("count_predict_word: ", count_predict_word)
-        print("count_real_word: ", count_real_word)
-        print("Word measures", "Precision", round(word_precision * 100, 2), "Recall", round(word_recall * 100, 2), "F1",
+        print("Correctly predicted words", word_correct)
+        print("Number of predicted words", count_predict_word)
+        print("Number of real words", count_real_word)
+        print("Precision", round(word_precision * 100, 2), "Recall", round(word_recall * 100, 2), "F1",
               round(word_f1 * 100, 2))
+        print()
+        print("sample result")
+        print("label  : "+ "".join(chars))
+        print("predict: "+"".join(pred_seq))
 
-        print("".join(chars))
-        print("".join(pred_seq))
-
-        with open(CHECKPOINTS_TOKENIZER + args.save_to, "a") as outFile:
+        with open(log_path, "a+") as outFile:
 
             print("falseNegatives ", falseNegatives, file=outFile)
             print("falsePositives ", falsePositives, file=outFile)
@@ -588,9 +555,11 @@ def test():
             print("".join(chars), file=outFile)
             print("".join(pred_seq), file=outFile)
             print(total_time, file=outFile)
+    csv_path = os.path.join(CHECKPOINTS_TOKENIZER, "tokenizer_result.csv")
+    with open(csv_path, "a+") as table:
 
-    with open(CHECKPOINTS_TOKENIZER + "tokenizer_result.csv", "a") as table:
-        print("---------save results------")
+        print()
+        print("..........................")
         print("-", file=table, end=';')
         if str(args.load_from)[:2] == "LM":
             print("LM", file=table, end=';')
@@ -618,7 +587,7 @@ def test():
         print(word_recall, file=table, end=';')
         print(word_f1, file=table, end=';')
 
-        print(num_epoch+1, file=table, end=';')
+        print(num_epoch + 1, file=table, end=';')
         print(total_time, file=table, end=';')
 
         print("trainLosses ", trainLosses, file=table, end=';')
@@ -634,7 +603,9 @@ def test():
 
 end = timer()
 total_time = timedelta(seconds=end - start)
-print(timedelta(seconds=end - start))
+print("time usage for the training: ", timedelta(seconds=end - start))
+print()
 test()
-print(args.save_to)
-print(args.add_note)
+print("append the result to tokenizer_result.csv")
+print("log file: ", log_path)
+print("model name: ", args.save_to)
