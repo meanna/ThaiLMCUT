@@ -4,10 +4,10 @@ import logging
 
 import torch
 
-#from .data_LM import stoi, itos
-#from .model import Model
-from data_LM import stoi, itos
-from model import Model
+from .data_LM import stoi, itos
+from .model import Model
+#from data_LM import stoi, itos
+#from model import Model
 
 # set weights path
 file_path = os.path.dirname(os.path.abspath(__file__))
