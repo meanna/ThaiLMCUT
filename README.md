@@ -3,7 +3,7 @@ ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidi
 
 ## About
 - the tokenizer utilizes transfer learning from a character language model which is trained on a large Thai hotel review corpus and InterBEST2009.
-- at the moment, the tokenizer supports only Thai texts. Texts that includes English characters or special symbols will not be tokenized correctly, since the model was trained exclusively using Thai characters.
+- at the moment, the tokenizer supports only Thai texts. Texts that includes English characters or special symbols will not be tokenized correctly, since the model was trained exclusively using Thai texts (also with out any spaces, special symbols, and digits).
 - we will soon release the model that supports those characters as well.
 
 
@@ -54,8 +54,7 @@ Result will be a list of tokens:
 ### Train a language model
 
 Define the training and development dataset in `train/get_corpus_lm.py`
-See expected input in `data/news_00001.txt`
-
+Input data can be any text. If you use InterBEST2009, the boundary markers must be removed (see `train/get_corpus.py`)
 To train a new language model, you could run:
 ```
 python train/LanguageModel.py --dataset [dataset name] --batchSize 60  --char_dropout_prob 0.01  --char_embedding_size 200   --hidden_dim 500  --layer_num 3  --learning_rate 0.0001 --sequence_length 100  --epoch 20 --len_lines_per_chunk 1000 --optim [adam or sgd] --lstm_num_direction [2 for bidirectional LSTM]  --add_note "..add some note.."
@@ -63,19 +62,39 @@ python train/LanguageModel.py --dataset [dataset name] --batchSize 60  --char_dr
 
 To resume the training of a language model, you could run
 ```
-python train/LanguageModel.py   `--load_from [model name]`  --dataset [dataset name]  --learning_rate 0.0001 --epoch 20  --optim [adam or sgd] --add_note "..add some note.."
+python train/LanguageModel.py   --load_from [model name]  --dataset [dataset name]  --learning_rate 0.0001 --epoch 20  --optim [adam or sgd] "
 ```
 
 ### Train a new tokenizer
+* Expected input is InterBEST2009 or any corpus with boundary marker `|`
+* Define the train, dev, test dataset in `train/get_corpus_lm.py`
+* Example of an input text can be found in `data/news_00001.txt`
 
-( this section is not completed yet)
+```
+python Tokenizer.py --epoch 5 --lstm_num_direction 2 --batchSize 30 --sequence_length 80 --char_embedding_size 100 --hidden_dim 60 --layer_num 2 [adam or sgd] --learning_rate 0.0001
+```
 
-* news_00001.txt in the `data` folder is from InterBEST2009 corpus which is publicly available at [NECTEC](https://www.nectec.or.th/corpus/index.php?league=pm)
+* to transfer the embedding layer and recurrent layer of a pre-trained language model, run
+
+```
+python Tokenizer.py --load_from [language model name] --epoch 5  --learning_rate 0.0001
+```
+* to resume the training of a tokenizer, run
+```
+python Tokenizer.py --load_from [tokenizer name] --epoch 5  --learning_rate 0.0001 
+```
+
+* use `--over_write 1` if you want to over write the weights to the resumed model
+* with `--over_write 0` it will save the trained model as a new model
+
+* See other arguments in `train/Tokenizer.py` and `train/LanguageModel.py`
+
+* `data/news_00001.txt` is from InterBEST2009 corpus which is publicly available at [NECTEC](https://www.nectec.or.th/corpus/index.php?league=pm)
 
 # Credits
-* Most of the code are modified from https://github.com/m-hahn/tabula-rasa-rnns
+* Most of the code are from [Tabula nearly rasa: Probing the Linguistic Knowledge of Character-Level Neural Language Models Trained on Unsegmented Text](https://github.com/m-hahn/tabula-rasa-rnns)
 * Some parts are from DeepCut and Attacut 
-* We would like to thank the contributors of the code
+* We would like to thank all the contributors
 
 # License
 
