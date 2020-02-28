@@ -3,8 +3,8 @@ ThaiLMCut - Deep Learning Tokenizer for Thai language based on Transfer Learning
 
 ## About
 - the tokenizer utilizes transfer learning from a character language model which is trained on a large Thai hotel review corpus and InterBEST2009.
-- at the moment, the tokenizer supports only Thai text only. Texts that includes English characters or special symbols will not be tokenized correctly, since the model was trained only on Thai characters.
-- we will soon release the model that supports English characters as well.
+- at the moment, the tokenizer supports only Thai texts. Texts that includes English characters or special symbols will not be tokenized correctly, since the model was trained only on Thai characters.
+- we will soon release the model that supports those characters as well.
 
 
 ## Requirements
