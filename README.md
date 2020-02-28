@@ -1,4 +1,4 @@
-ThaiLMCut - Deep Learning Tokenizer for Thai language based on Transfer Learning and bidirectional-LSTM
+ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidirectional-LSTM
 =====================================================
 
 ## About
