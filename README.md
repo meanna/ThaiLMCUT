@@ -72,6 +72,10 @@ python train/LanguageModel.py   `--load_from [model name]`  --dataset [dataset n
 
 * news_00001.txt in the `data` folder is from InterBEST2009 corpus which is publicly available at [NECTEC](https://www.nectec.or.th/corpus/index.php?league=pm)
 
+# Credits
+Most of the code are modified from https://github.com/m-hahn/tabula-rasa-rnns
+Some parts are from DeepCut and Attacut 
+We would like to thank the contributors of the code
 
 # License
 
