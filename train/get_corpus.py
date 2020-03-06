@@ -1,4 +1,3 @@
-# credit: the code below is modified from https://github.com/m-hahn/tabula-rasa-rnns
 import random
 import os
 
@@ -17,11 +16,11 @@ random.seed(4)
 # define the dataset paths for the language model
 
 def get_path_data_LM(dataset="default"):
-
+    # please change train/dev/test dataset before training
     if dataset == "default":
-        train_path = ""
-        dev_path = ""
-        test_path = ""
+        train_path = os.path.join(HOME,"data", "TEST_100K.txt")
+        dev_path = os.path.join(HOME,"data", "TEST_100K.txt")
+        test_path = os.path.join(HOME,"data", "TEST_100K.txt")
 
     else:
         raise AssertionError("the given dataset name is wrong :",dataset )
@@ -29,7 +28,7 @@ def get_path_data_LM(dataset="default"):
 
 
 def get_path_data_tokenizer(dataset="default"):
-
+    # please change train/dev/test dataset before training
     if dataset == "default":
         train_path = os.path.join(HOME,"data", "news_00001.txt")
         dev_path = os.path.join(HOME,"data", "news_00001.txt")
@@ -39,13 +38,12 @@ def get_path_data_tokenizer(dataset="default"):
         raise AssertionError("the given dataset name is wrong :",dataset )
     return train_path, dev_path, test_path
 
-# we can also train LM using BEST2009
-preprocessing_LM = [
-    "remove_poem",
-    "remove_tags",
-    "remove_url",
-    "remove_newline"
-]
+
+# following code for text preprocessing is modified from AttaCut
+
+# you can train the LM using any text. If you use BEST2009, preprocessing is needed
+# the tags must be removed
+preprocessing_LM = []
 
 preprocessing_tokenizer = [
     "remove_poem",
@@ -94,7 +92,9 @@ def preprocess(text, steps):
             text = s(text)
     return text
 
-# input: a text file (if using BEST2009, we have to adjust the preprocessing step)
+# the code below is modified from https://github.com/m-hahn/tabula-rasa-rnns
+
+# input: a text file (if using BEST2009, you can adjust the preprocessing step to remove the tags)
 # output: a string containing "len_chunk" number of lines
 def load_data_LM(path_corpus, doShuffling=False, len_chunk=100):
 
