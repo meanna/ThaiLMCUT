@@ -74,12 +74,12 @@ python train/LanguageModel.py   --load_from [model name]  --dataset [dataset nam
 python Tokenizer.py --epoch 5 --lstm_num_direction 2 --batchSize 30 --sequence_length 80 --char_embedding_size 100 --hidden_dim 60 --layer_num 2 [adam or sgd] --learning_rate 0.0001
 ```
 
-* to transfer the embedding layer and recurrent layer of a pre-trained language model, run
+* to transfer the embedding layer and recurrent layer of a pre-trained language model, you could run
 
 ```
 python Tokenizer.py --load_from [language model name] --epoch 5  --learning_rate 0.0001
 ```
-* to resume the training of a tokenizer, run
+* to resume the training of a tokenizer, you could run
 ```
 python Tokenizer.py --load_from [tokenizer name] --epoch 5  --learning_rate 0.0001 
 ```
@@ -89,7 +89,7 @@ python Tokenizer.py --load_from [tokenizer name] --epoch 5  --learning_rate 0.00
 
 * See other arguments in `train/Tokenizer.py` and `train/LanguageModel.py`
 
-* `data/news_00001.txt` is from InterBEST2009 corpus which is publicly available at [NECTEC](https://www.nectec.or.th/corpus/index.php?league=pm)
+* `data/news_00001.txt` and `data/TEST_100K.txt` is from InterBEST2009 corpus which is publicly available at [NECTEC](https://www.nectec.or.th/corpus/index.php?league=pm)
 
 # Credits
 * Most of the code are borrowed from [Tabula nearly rasa: Probing the Linguistic Knowledge of Character-Level Neural Language Models Trained on Unsegmented Text](https://github.com/m-hahn/tabula-rasa-rnns)
