@@ -19,8 +19,8 @@ random.seed(4)
 def get_path_data_LM(dataset="default"):
 
     if dataset == "default":
-        train_path = os.path.join(HOME, data)
-        dev_path = "../../thai_paper_model/data/TY_dataset/trustyou_toy_dev_2000.txt"
+        train_path = ""
+        dev_path = ""
         test_path = ""
 
     else:
