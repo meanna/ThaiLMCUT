@@ -92,8 +92,8 @@ python Tokenizer.py --load_from [tokenizer name] --epoch 5  --learning_rate 0.00
 * `data/news_00001.txt` is from InterBEST2009 corpus which is publicly available at [NECTEC](https://www.nectec.or.th/corpus/index.php?league=pm)
 
 # Credits
-* Most of the code are from [Tabula nearly rasa: Probing the Linguistic Knowledge of Character-Level Neural Language Models Trained on Unsegmented Text](https://github.com/m-hahn/tabula-rasa-rnns)
-* Some parts are from DeepCut and Attacut 
+* Most of the code are borrowed from [Tabula nearly rasa: Probing the Linguistic Knowledge of Character-Level Neural Language Models Trained on Unsegmented Text](https://github.com/m-hahn/tabula-rasa-rnns)
+* Some codes are borrowed from [DeepCut](https://github.com/rkcosmos/deepcut) and [Attacut](https://github.com/PyThaiNLP/attacut/) 
 * We would like to thank all the contributors
 
 # License
