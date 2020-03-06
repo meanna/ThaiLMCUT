@@ -50,6 +50,7 @@ Result will be a list of tokens:
 ['โรง', 'แรม', 'ดี', 'สวยงาม', 'น่า', 'อยู่', 'มาก', 'ๆ']
 ```
 
+* [Try ThaiLMCut in Colab](https://colab.research.google.com/drive/1LpMsxP1xddodZTUPzOXdiiBR6IjMnk0E)
 
 ### Train a language model
 
