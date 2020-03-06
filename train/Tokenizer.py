@@ -1,3 +1,5 @@
+# credit: the code below is modified from https://github.com/m-hahn/tabula-rasa-rnns
+
 # sample command
 #python Tokenizer.py --epoch 5 --lstm_num_direction 2 --batchSize 30 --sequence_length 80 --char_embedding_size 100 --hidden_dim 60 --layer_num 2 --optim adam --learning_rate 0.0001
 

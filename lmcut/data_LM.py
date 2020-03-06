@@ -1,3 +1,4 @@
+# credit: the code below is modified from https://github.com/m-hahn/tabula-rasa-rnns
 import logging
 
 import torch
