@@ -77,24 +77,24 @@ python train/LanguageModel.py   --load_from [model name]  --dataset [dataset nam
 * Define the train, dev, test dataset in `train/get_corpus.py`
 * Example of an input text can be found in `data/news_00001.txt`
 
-* To train a new tokenizer, you could run:
+To train a new tokenizer, you could run:
 
 ```
 python Tokenizer.py --epoch 5 --lstm_num_direction 2 --batchSize 30 --sequence_length 80 --char_embedding_size 100 --hidden_dim 60 --layer_num 2 [adam or sgd] --learning_rate 0.0001
 ```
 
-* to transfer the embedding layer and recurrent layer of a pre-trained language model, you could run
+to transfer the embedding layer and recurrent layer of a pre-trained language model, you could run
 
 ```
 python Tokenizer.py --load_from [language model name] --epoch 5  --learning_rate 0.0001
 ```
-* to resume the training of a tokenizer, you could run
+to resume the training of a tokenizer, you could run
 ```
 python Tokenizer.py --load_from [tokenizer name] --epoch 5  --learning_rate 0.0001 
 ```
 
-* use `--over_write 1` if you want to over write the weights to the resumed model
-* with `--over_write 0` it will save the trained model as a new model
+** use `--over_write 1` if you want to over write the weights to the resumed model
+** with `--over_write 0` it will save the trained model as a new model
 
 * More detail about other arguments, see `train/Tokenizer.py` and `train/LanguageModel.py`
 
