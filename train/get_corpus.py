@@ -19,13 +19,7 @@ random.seed(4)
 def get_path_data_LM(dataset="default"):
 
     if dataset == "default":
-        #file_name = "encyclopedia_00093.txt"
-        file_name = "trustyou_toy_train_2000.txt"
-        #file_name = "thai_500aa.txt"
-        #train_path = os.path.join(HOME,"data", file_name)
-        #dev_path =os.path.join(HOME,"data", "trustyou_toy_dev_2000.txt")
-        #trustyou_toy_train_4000.txt
-        train_path = "../../thai_paper_model/data/TY_dataset/trustyou_train_10000.txt"
+        train_path = os.path.join(HOME, data)
         dev_path = "../../thai_paper_model/data/TY_dataset/trustyou_toy_dev_2000.txt"
         test_path = ""
 
