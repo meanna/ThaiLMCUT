@@ -7,7 +7,7 @@ ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidi
 - we will soon release the model that supports those characters as well.
 
 
-![the language model](https://github.com/meanna/upload/blob/master/pic_lm.png?raw=true?s=200) 
+![the language model](https://github.com/meanna/upload/blob/master/pic_lm.png?raw=true?s=20) 
 ![the word segmentation model](https://github.com/meanna/upload/blob/master/pic_ws.png?raw=true)
 
 
