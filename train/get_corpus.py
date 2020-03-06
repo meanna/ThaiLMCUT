@@ -5,7 +5,7 @@ import re
 from itertools import chain
 
 #from .set_path import HOME
-from set_path import HOME
+from set_path import DATA
 
 """
 some part of the code is from attacut
@@ -18,9 +18,9 @@ random.seed(4)
 def get_path_data_LM(dataset="default"):
     # please change train/dev/test dataset before training
     if dataset == "default":
-        train_path = os.path.join(HOME,"data", "TEST_100K.txt")
-        dev_path = os.path.join(HOME,"data", "TEST_100K.txt")
-        test_path = os.path.join(HOME,"data", "TEST_100K.txt")
+        train_path = os.path.join(DATA, "TEST_100K.txt")
+        dev_path = os.path.join(DATA, "TEST_100K.txt")
+        test_path = os.path.join(DATA, "TEST_100K.txt")
 
     else:
         raise AssertionError("the given dataset name is wrong :",dataset )
@@ -30,9 +30,9 @@ def get_path_data_LM(dataset="default"):
 def get_path_data_tokenizer(dataset="default"):
     # please change train/dev/test dataset before training
     if dataset == "default":
-        train_path = os.path.join(HOME,"data", "news_00001.txt")
-        dev_path = os.path.join(HOME,"data", "news_00001.txt")
-        test_path = os.path.join(HOME, "data", "news_00001.txt")
+        train_path = os.path.join(DATA, "news_00001.txt")
+        dev_path = os.path.join(DATA, "news_00001.txt")
+        test_path = os.path.join(DATA, "news_00001.txt")
 
     else:
         raise AssertionError("the given dataset name is wrong :",dataset )
