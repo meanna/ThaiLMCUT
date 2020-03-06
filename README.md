@@ -8,6 +8,8 @@ ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidi
 
 <img src="https://github.com/meanna/upload/blob/master/pic_lm.png?raw=true" width="415">      <img src="https://github.com/meanna/upload/blob/master/pic_ws.png?raw=true" width="415">
 
+
+* an example input from a hotel review
 <img src="https://github.com/meanna/upload/blob/master/example_final.jpg?raw=true">
 
 ## Requirements
