@@ -6,7 +6,7 @@ ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidi
 - at the moment, the tokenizer supports only Thai texts. Texts that includes English characters or special symbols will not be tokenized correctly, since the model was trained exclusively using Thai texts (also with out any spaces, special symbols, and digits).
 - we will soon release the model that supports those characters as well.
 
-<p align="center"><img src="http://drive.google.com/uc?export=view&id=1EncG1B-Yf204lXyn1g9Hga35h_ecDI_H" width="368"><img src="http://drive.google.com/uc?export=view&id=11D_vOzmCCeUA6VG3A3OaSklKwy0zToHB" width="368"></p>
+<p align="center"><img src="https://github.com/meanna/ThaiLMCUT/blob/master/graphic_lmcut/pic_lm.png?raw=true" width="368"><img src="https://github.com/meanna/ThaiLMCUT/blob/master/graphic_lmcut/pic_ws.png?raw=true" width="368"></p>
 
 
 * an example input from a hotel review
