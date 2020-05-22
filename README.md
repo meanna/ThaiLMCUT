@@ -2,7 +2,7 @@ ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidi
 =====================================================
 
 ## About
-- the tokenizer utilizes transfer learning from a character language model which is trained on a large Thai hotel review corpus and InterBEST2009.
+- the tokenizer utilizes transfer learning from a character language model which is trained on a large Thai hotel review corpus and [InterBEST2009](https://www.nectec.or.th/corpus/index.php?league=pm).
 - at the moment, the tokenizer supports only Thai texts. Texts that includes English characters or special symbols will not be tokenized correctly, since the model was trained exclusively using Thai texts (also with out any spaces, special symbols, and digits).
 - we will soon release the model that supports those characters as well.
 - [Try ThaiLMCut in Colab](https://colab.research.google.com/drive/1LpMsxP1xddodZTUPzOXdiiBR6IjMnk0E)
