@@ -107,6 +107,9 @@ python Tokenizer.py --load_from [tokenizer name] --epoch 5  --learning_rate 0.00
 * Some codes are borrowed from [DeepCut](https://github.com/rkcosmos/deepcut) and [Attacut](https://github.com/PyThaiNLP/attacut/) 
 * We would like to thank all the contributors
 
+# Acknowledgements
+The project is funded by [TrustYou](https://www.trustyou.com/). The author would like to sincerely thank TrustYou and other contributors of this project.
+
 # License
 
 All original code in this project is licensed under the MIT License. See the included LICENSE file.
