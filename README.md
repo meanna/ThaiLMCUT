@@ -110,6 +110,13 @@ python Tokenizer.py --load_from [tokenizer name] --epoch 5  --learning_rate 0.00
 # Acknowledgements
 The project is funded by [TrustYou](https://www.trustyou.com/). The author would like to sincerely thank TrustYou and other contributors of this project.
 
+# Contributors
+- Suteera  Seeha
+- Ivan Bilan
+- Liliana Mamani Sanchez
+- Johannes Huber
+- Michael Matuschek
+
 # License
 
 All original code in this project is licensed under the MIT License. See the included LICENSE file.
