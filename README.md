@@ -10,7 +10,9 @@ ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidi
 
 
 * an example input from a hotel review
-<img src="https://github.com/meanna/upload/blob/master/example_final.jpg?raw=true">
+<img src="https://github.com/meanna/ThaiLMCUT/blob/master/graphic_lmcut/example_final.jpg?raw=true">
+
+* [Try ThaiLMCut in Colab](https://colab.research.google.com/drive/1LpMsxP1xddodZTUPzOXdiiBR6IjMnk0E)
 
 ## Requirements
 
@@ -55,7 +57,6 @@ Result will be a list of tokens:
 ['โรง', 'แรม', 'ดี', 'สวยงาม', 'น่า', 'อยู่', 'มาก', 'ๆ']
 ```
 
-* [Try ThaiLMCut in Colab](https://colab.research.google.com/drive/1LpMsxP1xddodZTUPzOXdiiBR6IjMnk0E)
 
 ### Train a language model
 
