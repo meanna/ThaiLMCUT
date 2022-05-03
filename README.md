@@ -29,9 +29,9 @@ Texts that includes English characters or special symbols will not be tokenized 
 https://drive.google.com/file/d/1e39tNMfUFzYQ4MDHTMyNWfNUxu9RoaTA/view?usp=sharing
 ```
 
-### Move the weight file to this path:
+### Move the weight file to this directory:
 ```
-lmcut/weight/.
+lmcut/weight/
 ```
 
 ### Create a package wheel using:

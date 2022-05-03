@@ -3,7 +3,6 @@
 import torch
 from torch.autograd import Variable
 
-from train.data_utils import itos
 
 hidden = None
 
@@ -13,7 +12,7 @@ class Model:
     define the model and download weights
     """
 
-    def __init__(self, char_embedding_size, hidden_dim, layer_num, lstm_num_direction, cuda):
+    def __init__(self, char_embedding_size, hidden_dim, layer_num, lstm_num_direction, cuda, id_to_char):
 
         bi_lstm = lstm_num_direction == 2
         self.logsoftmax = torch.nn.LogSoftmax(dim=2)
@@ -26,7 +25,7 @@ class Model:
             else:
                 self.rnn = torch.nn.LSTM(char_embedding_size, hidden_dim, layer_num).cuda()
                 self.output_classifier = torch.nn.Linear(hidden_dim, 2).cuda()
-            self.char_embeddings = torch.nn.Embedding(num_embeddings=len(itos),
+            self.char_embeddings = torch.nn.Embedding(num_embeddings=len(id_to_char),
                                                       embedding_dim=char_embedding_size).cuda()
         else:
             if bi_lstm:
@@ -36,7 +35,7 @@ class Model:
                 self.rnn = torch.nn.LSTM(char_embedding_size, hidden_dim, layer_num)
                 self.output_classifier = torch.nn.Linear(hidden_dim, 2)
 
-            self.char_embeddings = torch.nn.Embedding(num_embeddings=len(itos), embedding_dim=char_embedding_size)
+            self.char_embeddings = torch.nn.Embedding(num_embeddings=len(id_to_char), embedding_dim=char_embedding_size)
 
     def _forward(self, numeric):
         global hidden

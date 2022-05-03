@@ -6,16 +6,21 @@ import logging
 
 import torch
 
-from train.data_utils import itos, stoi
+from train.data_utils import itos, stoi, itos_thai, stoi_thai
 from .model import Model
 
 # set weights path
 file_path = os.path.dirname(os.path.abspath(__file__))
 WEIGHTS_DIR = os.path.join(file_path, "weight")
 # best model (supports only Thai language) : "Tokenizer_2019-11-11_04.24.19"
-WEIGHT_FILE_NAME = "Tokenizer_2022-05-03_19.58.29"
+WEIGHT_FILE_NAME = "Tokenizer_2019-11-11_04.24.19"
 WEIGHTS_PATH = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME + ".pth.tar")
 PARAMS = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME + ".json")
+
+
+if WEIGHT_FILE_NAME == "Tokenizer_2019-11-11_04.24.19":
+    itos, stoi = itos_thai, stoi_thai
+
 
 cuda = torch.cuda.is_available()
 logging.info("GPU available", torch.cuda.is_available())
@@ -54,7 +59,7 @@ class LM_CUT:
         lstm_num_direction = args_dict["lstm_num_direction"]
         self.batchSize = 1
 
-        self.model = Model(char_embedding_size, hidden_dim, layer_num, lstm_num_direction, cuda)
+        self.model = Model(char_embedding_size, hidden_dim, layer_num, lstm_num_direction, cuda, itos)
         self._load_weight(self.model, WEIGHTS_PATH)
         self.model.rnn.train(False)
 
