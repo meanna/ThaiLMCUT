@@ -81,7 +81,7 @@ python train/LanguageModel.py \
 --layer_num 3 \
 --learning_rate 0.0001 \
 --sequence_length 100 \
---epoch 20 \
+--epoch 10 \
 --len_lines_per_chunk 1000 \
 --optim [adam or sgd] \
 --lstm_num_direction [2 means bidirectional and 1 means uni directional] \
@@ -102,7 +102,7 @@ python train/LanguageModel.py \
 --len_lines_per_chunk 100 \
 --optim adam \
 --lstm_num_direction 2 \
---add_note "test the command"
+--add_note "test if code runs properly"
 ```
 
 
@@ -111,9 +111,10 @@ To resume the training of a language model, run
 python train/LanguageModel.py \
 --load_from [model name to resume] \
 --dataset [dataset name] \
+--epoch 3 \
 --learning_rate 0.0001 \
---epoch 20 \
---optim [adam or sgd] "
+--optim [adam or sgd] \
+--over_write 1
 ```
 
 - `[language model name]` must starts with `LM`, for example, `LM_2022-05-03_18.59.59`.
@@ -137,7 +138,7 @@ python train/LanguageModel.py \
 To train a new tokenizer, you could run:
 
 ```
-python Tokenizer.py \
+python train/Tokenizer.py \
 --dataset default \
 --epoch 3 \
 --lstm_num_direction 2 \
@@ -153,22 +154,30 @@ python Tokenizer.py \
 To load a pre-trained language model(the embedding layer and recurrent layer) to the tokenizer and train, you could run
 
 ```
-python Tokenizer.py \
+python train/Tokenizer.py \
 --load_from [language model name] \
---epoch 5 \
+--dataset default \
+--epoch 2 \
+--optim [adam or sgd] \
 --learning_rate 0.0001 \
+--over_write 0
 ```
 - `[language model name]` must start with `LM`, for example, `LM_2022-05-03_18.59.59`.
 
 To resume the training of a tokenizer, you could run
 ```
-python Tokenizer.py \
+python train/Tokenizer.py \
 --load_from [tokenizer name] \
---epoch 5 \
---learning_rate 0.0001 
+--dataset default \
+--epoch 2 \
+--optim [adam or sgd] \
+--learning_rate 0.0001 \
+--over_write 1
 ```
 
 - `[tokenizer name]` should begin with `Tokenizer`, for example, `Tokenizer_2022-05-03_20.46.35`.
+- Use `--over_write 1` if you want to replace the loaded model with the trained model.
+- With `--over_write 0` it will save the trained model as a separate model.
 
 - Model artifacts are in `train/checkpoints_tokenizer`
   - After the training, 4 files will be generated.
@@ -178,9 +187,6 @@ python Tokenizer.py \
     Tokenizer_2022-05-03_18.53.26.pth.tar  (model weights)
     tokenizer_result.csv    (a log file in csv, for collecting experiment results)
     ```
-  
-- Use `--over_write 1` if you want to replace the loaded model with the trained model.
-- With `--over_write 0` it will save the trained model as a separate model.
 
 - For more detail about other arguments, see `train/Tokenizer.py` and `train/LanguageModel.py`
 
