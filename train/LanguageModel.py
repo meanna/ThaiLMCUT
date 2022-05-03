@@ -256,7 +256,7 @@ def save_csv(f="LM_log.csv"):
 # model training
 if train:
     model = Model(bi_lstm)
-    train_path, dev_path, test_path = get_path_data_LM(dataset)
+    train_path, dev_path = get_path_data_LM(dataset)
     if cuda:
         zeroBeginning = torch.LongTensor([2 for _ in range(args.batchSize)]).cuda().view(1, args.batchSize)
     else:
