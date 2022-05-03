@@ -120,13 +120,13 @@ python train/LanguageModel.py \
 
 
 - Model artifacts are in `train/checkpoints_LM`
-- After the training, 4 files will be generated.
-```
-LM_2022-05-03_18.28.05          (log file)
-LM_2022-05-03_18.28.05.json     (data about model structure used when reloading the model)
-LM_2022-05-03_18.28.05.pth.tar  (model weights)
-LM_log.csv    (a log file in csv, for collecting experiment results)
-```
+  - After the training, 4 files will be generated.
+    ```
+    LM_2022-05-03_18.28.05          (log file)
+    LM_2022-05-03_18.28.05.json     (data about model structure used when reloading the model)
+    LM_2022-05-03_18.28.05.pth.tar  (model weights)
+    LM_log.csv    (a log file in csv, for collecting experiment results)
+    ```
 
 ### Train a new tokenizer
 * The expected input is the InterBEST2009 dataset or any corpus with boundary marker `|`.
@@ -170,6 +170,15 @@ python Tokenizer.py \
 
 - `[tokenizer name]` should begin with `Tokenizer`, for example, `Tokenizer_2022-05-03_20.46.35`.
 
+- Model artifacts are in `train/checkpoints_tokenizer`
+  - After the training, 4 files will be generated.
+    ```
+    Tokenizer_2022-05-03_18.53.26          (log file)
+    Tokenizer_2022-05-03_18.53.26.json     (data about model structure used when reloading the model)
+    Tokenizer_2022-05-03_18.53.26.pth.tar  (model weights)
+    tokenizer_result.csv    (a log file in csv, for collecting experiment results)
+    ```
+  
 - Use `--over_write 1` if you want to replace the loaded model with the trained model.
 - With `--over_write 0` it will save the trained model as a separate model.
 
