@@ -1,9 +1,9 @@
+# -*- coding: utf-8 -*-
 # credit: the code below is modified from https://github.com/m-hahn/tabula-rasa-rnns
 import torch
 from torch.autograd import Variable
 
-from .data_LM import itos
-#from data_LM import itos
+from train.data_utils import itos
 
 hidden = None
 
@@ -16,15 +16,12 @@ class Model:
     def __init__(self, char_embedding_size, hidden_dim, layer_num, lstm_num_direction, cuda):
 
         bi_lstm = lstm_num_direction == 2
-
         self.logsoftmax = torch.nn.LogSoftmax(dim=2)
-
         self.classifier_loss = torch.nn.CrossEntropyLoss()
 
         if cuda:
             if bi_lstm:
-                self.rnn = torch.nn.LSTM(char_embedding_size, hidden_dim, layer_num,
-                                         bidirectional=True).cuda()
+                self.rnn = torch.nn.LSTM(char_embedding_size, hidden_dim, layer_num, bidirectional=True).cuda()
                 self.output_classifier = torch.nn.Linear(hidden_dim * 2, 2).cuda()
             else:
                 self.rnn = torch.nn.LSTM(char_embedding_size, hidden_dim, layer_num).cuda()
@@ -39,8 +36,7 @@ class Model:
                 self.rnn = torch.nn.LSTM(char_embedding_size, hidden_dim, layer_num)
                 self.output_classifier = torch.nn.Linear(hidden_dim, 2)
 
-            self.char_embeddings = torch.nn.Embedding(num_embeddings=len(itos),
-                                                      embedding_dim=char_embedding_size)
+            self.char_embeddings = torch.nn.Embedding(num_embeddings=len(itos), embedding_dim=char_embedding_size)
 
     def _forward(self, numeric):
         global hidden

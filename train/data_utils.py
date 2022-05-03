@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import torch
 
 # define vocabulary
@@ -10,7 +11,7 @@ CHARS = [
     u'F', u'G', u'H', u'I', u'J', u'K', u'L', u'M', u'N', u'O', u'P', u'Q', u'R',
     u'S', u'T', u'U', u'V', u'W', u'X', u'Y', u'Z', u'[', u'\\', u']', u'^', u'_',
     u'a', u'b', u'c', u'd', u'e', u'f', u'g', u'h', u'i', u'j', u'k', u'l', u'm',
-    u'n', u'o', u'other', u'p', u'q', u'r', u's', u't', u'u', u'v', u'w', u'x', u'y',
+    u'n', u'o', u'p', u'q', u'r', u's', u't', u'u', u'v', u'w', u'x', u'y',
     u'z', u'}', u'~', u'ก', u'ข', u'ฃ', u'ค', u'ฅ', u'ฆ', u'ง', u'จ', u'ฉ', u'ช',
     u'ซ', u'ฌ', u'ญ', u'ฎ', u'ฏ', u'ฐ', u'ฑ', u'ฒ', u'ณ', u'ด', u'ต', u'ถ', u'ท',
     u'ธ', u'น', u'บ', u'ป', u'ผ', u'ฝ', u'พ', u'ฟ', u'ภ', u'ม', u'ย', u'ร', u'ฤ',
@@ -20,8 +21,14 @@ CHARS = [
     u'๔', u'๕', u'๖', u'๗', u'๘', u'๙', u'‘', u'’', u'\ufeff'
 ]
 
-itos = ['<START>'] + ['<END>'] + ['<UNK>'] + list(CHARS)
+itos = ['<START>'] + ['<END>'] + ['<UNK>'] + CHARS
 stoi = {char:id for id, char in enumerate(itos)}
+
+# define vocabulary
+# thai_chars = 'กขฃคฅฆงจฉชซฌญฐฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืุูเแโใไๅๆ็่้๊๋์ํ'
+# chars = thai_chars + "."
+# itos = ['<START>'] + ['<END>'] + ['<UNK>'] + list(chars)
+# stoi = {v: k for k, v in enumerate(itos)}
 
 cuda = torch.cuda.is_available()
 

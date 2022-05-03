@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # credit: the code below is modified from https://github.com/m-hahn/tabula-rasa-rnns
 import json
 import os.path
@@ -5,23 +6,21 @@ import logging
 
 import torch
 
-from .data_LM import stoi, itos
+from train.data_utils import itos, stoi
 from .model import Model
-#from data_LM import stoi, itos
-#from model import Model
 
 # set weights path
 file_path = os.path.dirname(os.path.abspath(__file__))
 WEIGHTS_DIR = os.path.join(file_path, "weight")
-WEIGHT_FILE_NAME = "Tokenizer_2019-11-11_04.24.19"
-WEIGHTS_PATH = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME+".pth.tar")
-PARAMS = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME+".json")
+# best model (supports only Thai language) : "Tokenizer_2019-11-11_04.24.19"
+WEIGHT_FILE_NAME = "Tokenizer_2022-05-03_19.58.29"
+WEIGHTS_PATH = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME + ".pth.tar")
+PARAMS = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME + ".json")
 
 cuda = torch.cuda.is_available()
 logging.info("GPU available", torch.cuda.is_available())
-stoi = stoi
-itos = itos
-TOKENIZER = None
+
+tokenizer = None
 
 
 def _load_args(args_path):
@@ -31,10 +30,10 @@ def _load_args(args_path):
 
 
 def tokenize(text):
-    global TOKENIZER
-    if not TOKENIZER:
-        TOKENIZER = LM_CUT()
-    return TOKENIZER.tokenize(text)
+    global tokenizer
+    if not tokenizer:
+        tokenizer = LM_CUT()
+    return tokenizer.tokenize(text)
 
 
 # remove white space before tokenize the text
@@ -82,14 +81,12 @@ class LM_CUT:
         if cuda:
             input_tensor = torch.LongTensor(input_tensor).view(self.batchSize, -1, sequence_length).transpose(0,
                                                                                                               1).transpose(
-                1,
-                2).cuda()
+                1, 2).cuda()
 
         else:
             input_tensor = torch.LongTensor(input_tensor).view(self.batchSize, -1, sequence_length).transpose(0,
                                                                                                               1).transpose(
-                1,
-                2)
+                1, 2)
         yield input_tensor[0]
 
     # for tokenize only Thai characters

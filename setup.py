@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='lmcut',
-    packages=['lmcut', 'lmcut.weight'],
+    packages=['lmcut', 'lmcut.weight', 'train'],
     include_package_data=True,
     package_data={
         "lmcut.weight": ["*"],

@@ -1,15 +1,12 @@
+# -*- coding: utf-8 -*-
 # credit: the code below is modified from https://github.com/m-hahn/tabula-rasa-rnns
 import logging
-
+from train.data_utils import itos, stoi
 import torch
 
 cuda = torch.cuda.is_available()
 
-# define vocabulary
-thai_chars = 'กขฃคฅฆงจฉชซฌญฐฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืุูเแโใไๅๆ็่้๊๋์ํ'
-chars = thai_chars + "."
-itos = ['<START>'] + ['<END>'] + ['<UNK>'] + list(chars)
-stoi = {v: k for k, v in enumerate(itos)}
+
 
 
 # create batches

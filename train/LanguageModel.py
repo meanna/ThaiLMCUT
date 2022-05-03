@@ -1,12 +1,12 @@
+# -*- coding: utf-8 -*-
 # credit: the code below is modified from https://github.com/m-hahn/tabula-rasa-rnns
 
 # sample command
 # python LanguageModel.py --epoch 5 --lstm_num_direction 2 --batchSize 30 --sequence_length 80 --char_embedding_size 100 --hidden_dim 60 --layer_num 2
-
+import os
 import argparse
 import math
 import random
-import os
 import time
 from timeit import default_timer as timer
 from datetime import timedelta
@@ -14,10 +14,10 @@ from datetime import timedelta
 import torch
 from torch.autograd import Variable
 
-from get_corpus import *
-import util
+from get_corpus import get_path_data_LM, load_data_LM
+import utils
 from set_path import CHECKPOINTS_LM
-from data_util import *
+from data_utils import itos, prepareDatasetChunks
 
 start = timer()
 timestr = time.strftime("%Y-%m-%d_%H.%M.%S")
@@ -61,13 +61,14 @@ args = parser.parse_args()
 args_dict = vars(args)
 
 train = True
+save_log_to_csv = True
 print()
 if args.load_from is None:
     print("===========start training a language model===========")
 else:
     print("===========resume the training of " + str(args.load_from) + "===========")
     json_path = os.path.join(CHECKPOINTS_LM, args.load_from)
-    args_dict = util.load_args(json_path)
+    args_dict = utils.load_args(json_path)
     args.char_embedding_size = args_dict["char_embedding_size"]
     args.hidden_dim = args_dict["hidden_dim"]
     args.layer_num = args_dict["layer_num"]
@@ -101,7 +102,7 @@ print("GPU: ", torch.cuda.is_available())
 
 save_path = os.path.join(CHECKPOINTS_LM, args.save_to + ".pth.tar")
 log_path = os.path.join(CHECKPOINTS_LM, args.save_to)
-util.export_args(args_dict, log_path)
+utils.export_args(args_dict, log_path)
 
 
 class Model:
@@ -179,7 +180,7 @@ class Model:
         if train:
             embedded = char_dropout(embedded)
 
-        out, hidden = self.rnn(embedded, hidden)  # --------- training
+        out, hidden = self.rnn(embedded, hidden)  # < ------processing
 
         logits = self.output(out)
         log_probs = logsoftmax(logits)
@@ -202,7 +203,7 @@ def save_log(mode="w"):
             print("-----------Language Model---------", file=outFile)
         print("file name = ", CHECKPOINTS_LM + args.save_to, file=outFile)
         print("", file=outFile)
-        long, short = util.get_command(str(args))
+        long, short = utils.get_command(str(args))
         p = "python LanguageModel.py "
         long = p + long
         short = p + short
@@ -226,7 +227,7 @@ def save_log(mode="w"):
         print("dev set: ", dev_path, file=outFile)
         print("", file=outFile)
         print("config for later download : ", file=outFile)
-        p = util.get_param(str(args))
+        p = utils.get_param(str(args))
         print(p, file=outFile)
         print("", file=outFile)
         print("save log file to ", args.save_to)
@@ -238,20 +239,21 @@ def save_csv(f="LM_log.csv"):
     with open(csv_path, "a+") as table:
         print(args.save_to, file=table, end=';')
         print(args.dataset, file=table, end=';')
-        print(num_epoch + 1, file=table, end=';')
+        print(total_time, file=table, end=';')
+        print(epoch + 1, file=table, end=';')
         print("trainLosses ", trainLosses, file=table, end=';')
         print("devLosses ", devLosses, file=table, end=';')
         print(args.add_note, file=table, end=';')
-        p = util.get_param(str(args))
+        # log command line used to run this script
+        p = utils.get_param(str(args))
         print(p, file=table, end=';')
-        long, short = util.get_command(str(args))
+        long, short = utils.get_command(str(args))
         p = "python LanguageModel.py "
         long = p + long
         print(long, file=table, end='\n')
 
 
 # model training
-num_epoch = 1
 if train:
     model = Model(bi_lstm)
     train_path, dev_path, test_path = get_path_data_LM(dataset)
@@ -274,8 +276,8 @@ if train:
         training_chars = prepareDatasetChunks(args, training_data)
 
         model.rnn.train(True)
-        startTime = time.time()
-        trainChars = 0
+
+        train_chars = 0
         train_loss_ = 0
         counter = 0
         hidden, beginning = None, None
@@ -286,21 +288,24 @@ if train:
             except StopIteration:
                 break
 
-            loss, charCounts = model.forward(numeric, train=True)  # ---- training
+            loss, charCounts = model.forward(numeric, train=True)  # <------ training
 
             model.backward(loss)
 
             train_loss_ += charCounts * loss.cpu().data.numpy()
-            trainChars += charCounts
+            train_chars += charCounts
 
-        trainLosses.append(train_loss_ / trainChars)
+        trainLosses.append(train_loss_ / train_chars)
         print("train losses ", trainLosses)
 
-        #append training result in csv file
-        if True:
+        # append training result in csv file
+        if save_log_to_csv:
             print("saving the model... ")
-            torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]),
-                       save_path)
+            torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]), save_path)
+            end = timer()
+            total_time = timedelta(seconds=end - start)
+            print()
+            print("time usage for training: ", timedelta(seconds=end - start))
             save_csv(f="LM_log_temp.csv")
 
         model.rnn.train(False)
@@ -338,10 +343,11 @@ if train:
 
         end = timer()
         total_time = timedelta(seconds=end - start)
-        if True:
+        print()
+        print("time usage for train and dev: ", timedelta(seconds=end - start))
+        if save_log_to_csv:
             print("saving the model... ")
-            torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]),
-                       save_path)
+            torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]), save_path)
             save_csv(f="LM_log_temp.csv")
 
         if args.optim == "adam" and adam_with_lr_decay:
@@ -349,14 +355,8 @@ if train:
             optim = torch.optim.Adam(model.parameters(model.modules), lr=learning_rate)
         elif args.optim == "sgd":
             learning_rate = args.learning_rate * math.pow(args.lr_decay, len(devLosses))
-            optim = torch.optim.SGD(model.parameters(model.modules), lr=learning_rate,
-                                    momentum=args.sgd_momentum)
+            optim = torch.optim.SGD(model.parameters(model.modules), lr=learning_rate, momentum=args.sgd_momentum)
 
-end = timer()
-total_time = timedelta(seconds=end - start)
-print()
-print("time usage: ", timedelta(seconds=end - start))
-save_csv()
-print("append the result to LM_log.csv")
-print("log file: ", log_path)
-print("model name: ", args.save_to)
+    print("append the result to LM_log.csv")
+    print("log file: ", log_path)
+    print("model name: ", args.save_to)
