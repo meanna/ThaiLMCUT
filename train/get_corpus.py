@@ -17,19 +17,18 @@ random.seed(4)
 # define the dataset paths for the language model
 
 def get_path_data_LM(dataset="default"):
-    # please change train/dev/test dataset before training
+    # Specify data paths here
     if dataset == "default":
-        train_path = os.path.join(DATA, "TEST_100K.txt")
-        dev_path = os.path.join(DATA, "TEST_100K.txt")
-        test_path = os.path.join(DATA, "TEST_100K.txt")
+        train_path = os.path.join(DATA, "lm_data","lm_train.txt")
+        dev_path = os.path.join(DATA, "lm_data","lm_dev.txt")
+
     elif dataset == "ty":
         train_path = os.path.join(DATA, "ty", "trustyou_dev_0.1.txt")  # trustyou_train_0.9.txt
         dev_path = os.path.join(DATA, "ty", "trustyou_dev_0.1.txt")
-        test_path = os.path.join(DATA, "ty", "trustyou_dev_0.1.txt")
 
     else:
         raise AssertionError("the given dataset name is wrong :", dataset)
-    return train_path, dev_path, test_path
+    return train_path, dev_path
 
 
 def get_path_data_tokenizer(dataset="default"):
