@@ -16,8 +16,6 @@ ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidi
 <img src="https://github.com/meanna/ThaiLMCUT/blob/master/graphic_lmcut/lmcut_example2022.png?raw=true">
 
 
-----------
-
 ## Update 
 - (May 2022) added a model that supports both Thai and English
 - (May 2022) improved README and code
