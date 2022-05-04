@@ -23,7 +23,7 @@ def get_path_data_LM(dataset="default"):
         dev_path = os.path.join(DATA, "lm_data","lm_dev.txt")
 
     elif dataset == "ty":
-        train_path = os.path.join(DATA, "ty", "trustyou_dev_0.1.txt")  # trustyou_train_0.9.txt
+        train_path = os.path.join(DATA, "ty", "trustyou_train_0.9.txt")
         dev_path = os.path.join(DATA, "ty", "trustyou_dev_0.1.txt")
 
     else:
