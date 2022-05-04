@@ -234,9 +234,9 @@ def save_log(mode="w"):
 
 
 # append the result to "LM_log.csv"
-def save_csv(f="LM_log.csv"):
+def save_csv(f="LM_log.csv", mode="w"):
     csv_path = os.path.join(CHECKPOINTS_LM, f)
-    with open(csv_path, "a+") as table:
+    with open(csv_path, mode) as table:
         print(args.save_to, file=table, end=';')
         print(args.dataset, file=table, end=';')
         print(total_time, file=table, end=';')
@@ -298,14 +298,14 @@ if train:
         trainLosses.append(train_loss_ / train_chars)
         print("train losses ", trainLosses)
 
+        print("saving the model... ")
+        torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]), save_path)
+
         # append training result in csv file
         if save_log_to_csv:
-            print("saving the model... ")
-            torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]), save_path)
             end = timer()
             total_time = timedelta(seconds=end - start)
-            print()
-            print("time usage for training: ", timedelta(seconds=end - start))
+            print("\ntime usage for training: ", timedelta(seconds=end - start))
             save_csv(f="LM_log_temp.csv")
 
         model.rnn.train(False)
@@ -345,10 +345,10 @@ if train:
         total_time = timedelta(seconds=end - start)
         print()
         print("time usage for train and dev: ", timedelta(seconds=end - start))
-        if save_log_to_csv:
-            print("saving the model... ")
-            torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]), save_path)
-            save_csv(f="LM_log_temp.csv")
+
+        print("saving the model... ")
+        torch.save(dict([(name, module.state_dict()) for name, module in model.named_modules.items()]), save_path)
+
 
         if args.optim == "adam" and adam_with_lr_decay:
             learning_rate = args.learning_rate * math.pow(args.adam_lr_decay, len(devLosses))
@@ -360,3 +360,6 @@ if train:
     print("append the result to LM_log.csv")
     print("log file: ", log_path)
     print("model name: ", args.save_to)
+
+if save_log_to_csv:
+    save_csv(f="LM_log.csv", mode="a+")

@@ -12,7 +12,8 @@ from .model import Model
 file_path = os.path.dirname(os.path.abspath(__file__))
 WEIGHTS_DIR = os.path.join(file_path, "weight")
 # best model (supports only Thai language) : "Tokenizer_2019-11-11_04.24.19"
-WEIGHT_FILE_NAME = "Tokenizer_2019-11-11_04.24.19"
+# best model (supports Thai + English) : "Tokenizer_2022-05-04_10.22.18"
+WEIGHT_FILE_NAME = "Tokenizer_2022-05-04_10.22.18"
 WEIGHTS_PATH = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME + ".pth.tar")
 PARAMS = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME + ".json")
 
@@ -44,8 +45,9 @@ def tokenize(text):
     return tokenizer.tokenize(text)
 
 
-# remove white space before tokenize the text
+# not used
 def _remove_white_space(text):
+    # remove white space before tokenize the text
     text = text.replace(" ", "")
     text = text.replace("\t", "")
     text = text.replace("\n", "")
@@ -102,7 +104,7 @@ class LM_CUT:
         if not text:
             return [""]
 
-        text = _remove_white_space(text)
+        #text = _remove_white_space(text)
         out_put = []
         sequence_length = len(text)
         test_chars = self._create_tensor_classifier(text)
