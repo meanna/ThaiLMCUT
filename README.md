@@ -39,7 +39,7 @@ https://drive.google.com/drive/folders/1rUs765_FzalZWOJRSRL0cbQGW3lrV4JM?usp=sha
 
 ```
 model that supports only Thai
-https://drive.google.com/file/d/1e39tNMfUFzYQ4MDHTMyNWfNUxu9RoaTA/view?usp=sharing
+https://drive.google.com/drive/folders/1hJ4jsXdypP4mqZDsEgxEEfO-CLwAzHTj?usp=sharing
 ```
 
 ### Move the weight file to this directory:
