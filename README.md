@@ -126,7 +126,6 @@ python train/LanguageModel.py \
 --dataset [dataset name] \
 --epoch 3 \
 --learning_rate 0.0001 \
---optim [adam or sgd] \
 --over_write 1
 ```
 
@@ -171,7 +170,6 @@ python train/Tokenizer.py \
 --load_from [language model name] \
 --dataset default \
 --epoch 2 \
---optim [adam or sgd] \
 --learning_rate 0.0001 \
 --over_write 0
 ```
@@ -183,7 +181,6 @@ python train/Tokenizer.py \
 --load_from [tokenizer name] \
 --dataset default \
 --epoch 2 \
---optim [adam or sgd] \
 --learning_rate 0.0001 \
 --over_write 1
 ```
