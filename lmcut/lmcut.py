@@ -6,7 +6,6 @@ import logging
 
 import torch
 
-from train.data_utils import itos, stoi, itos_thai, stoi_thai
 from .model import Model
 
 # set weights path
@@ -17,10 +16,14 @@ WEIGHT_FILE_NAME = "Tokenizer_2019-11-11_04.24.19"
 WEIGHTS_PATH = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME + ".pth.tar")
 PARAMS = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME + ".json")
 
-
 if WEIGHT_FILE_NAME == "Tokenizer_2019-11-11_04.24.19":
-    itos, stoi = itos_thai, stoi_thai
-
+    # define vocabulary
+    thai_chars = 'กขฃคฅฆงจฉชซฌญฐฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืุูเแโใไๅๆ็่้๊๋์ํ'
+    chars = thai_chars + "."
+    itos = ['<START>'] + ['<END>'] + ['<UNK>'] + list(chars)
+    stoi = {v: k for k, v in enumerate(itos)}
+else:
+    from train.data_utils import stoi, itos
 
 cuda = torch.cuda.is_available()
 logging.info("GPU available", torch.cuda.is_available())
@@ -59,7 +62,7 @@ class LM_CUT:
         lstm_num_direction = args_dict["lstm_num_direction"]
         self.batchSize = 1
 
-        self.model = Model(char_embedding_size, hidden_dim, layer_num, lstm_num_direction, cuda, itos)
+        self.model = Model(char_embedding_size, hidden_dim, layer_num, lstm_num_direction, cuda, len(itos))
         self._load_weight(self.model, WEIGHTS_PATH)
         self.model.rnn.train(False)
 
