@@ -83,7 +83,9 @@ The model supports only Thai and English texts. Characters from other languages 
 * You can define your custom datasets in the function `get_path_data_LM` in `train/get_corpus.py`.
 * The dataset name defined there will be use in the command line flag `--dataset`.
 * note: if you use InterBEST2009, the boundary markers must be removed first.
-To train a new language model, run
+
+
+- To train a new language model, run
 ```
 python train/LanguageModel.py \
 --dataset [dataset name] \
@@ -100,7 +102,7 @@ python train/LanguageModel.py \
 --lstm_num_direction [2 means bidirectional and 1 means uni directional] \
 --add_note "..add some note.."
 ```
-Example command.
+Command example
 ```
 python train/LanguageModel.py \
 --dataset default \
@@ -175,7 +177,7 @@ python train/Tokenizer.py \
 --learning_rate 0.0001 \
 --over_write 0
 ```
-- `[language model name]` must start with `LM`, for example, `LM_2022-05-03_18.59.59`.
+- `[language model name]` should begin with `LM`, for example, `LM_2022-05-03_18.59.59`.
 
 To resume the training of a tokenizer, you could run
 ```
