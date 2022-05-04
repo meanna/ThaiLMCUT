@@ -13,7 +13,7 @@ ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidi
 
 
 * an example input from a hotel review
-<img src="https://github.com/meanna/ThaiLMCUT/blob/master/graphic_lmcut/example_final.jpg?raw=true">
+<img src="https://github.com/meanna/ThaiLMCUT/blob/master/graphic_lmcut/lmcut_example2022.png?raw=true">
 
 
 ----------
