@@ -32,13 +32,13 @@ ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidi
 
 ### Download the weight file from:
 
+- model that supports Thai and English
 ```
-# model that supports Thai and English
 https://drive.google.com/drive/folders/1rUs765_FzalZWOJRSRL0cbQGW3lrV4JM?usp=sharing
 ```
 
+- model that supports only Thai
 ```
-model that supports only Thai
 https://drive.google.com/drive/folders/1hJ4jsXdypP4mqZDsEgxEEfO-CLwAzHTj?usp=sharing
 ```
 
