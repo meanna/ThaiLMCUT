@@ -3,18 +3,24 @@ ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidi
 
 ## About
 - the tokenizer utilizes transfer learning from a character language model which is trained on a large Thai hotel review corpus and [InterBEST2009](https://www.nectec.or.th/corpus/index.php?league=pm).
-- at the moment, the tokenizer supports only Thai texts.
-Texts that includes English characters or special symbols will not be tokenized correctly, since the model was trained exclusively using Thai texts (also without any spaces, special symbols, and digits).
-- we will soon release the model that supports those characters as well.
+- **Update:** The tokenizer now supports both Thai and English texts.
 - [Try ThaiLMCut in Colab](https://colab.research.google.com/drive/1LpMsxP1xddodZTUPzOXdiiBR6IjMnk0E)
 - [Paper: ThaiLMCut: Unsupervised Pretraining for Thai Word Segmentation](http://www.lrec-conf.org/proceedings/lrec2020/pdf/2020.lrec-1.858.pdf)
 - [bibtex](http://www.lrec-conf.org/proceedings/lrec2020/bib/2020.lrec-1.858.bib)
+
 
 <p align="center"><img src="https://github.com/meanna/ThaiLMCUT/blob/master/graphic_lmcut/pic_lm.png?raw=true" width="368"><img src="https://github.com/meanna/ThaiLMCUT/blob/master/graphic_lmcut/pic_ws.png?raw=true" width="368"></p>
 
 
 * an example input from a hotel review
 <img src="https://github.com/meanna/ThaiLMCUT/blob/master/graphic_lmcut/example_final.jpg?raw=true">
+
+
+----------
+
+## Update 
+- (May 2022) added a model that supports both Thai and English
+- (May 2022) improved README and code
 
 ## Requirements
 
@@ -25,7 +31,14 @@ Texts that includes English characters or special symbols will not be tokenized 
 # Install LMCut as package
 
 ### Download the weight file from:
+
 ```
+# model that supports Thai and English
+https://drive.google.com/drive/folders/1rUs765_FzalZWOJRSRL0cbQGW3lrV4JM?usp=sharing
+```
+
+```
+model that supports only Thai
 https://drive.google.com/file/d/1e39tNMfUFzYQ4MDHTMyNWfNUxu9RoaTA/view?usp=sharing
 ```
 

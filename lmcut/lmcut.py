@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 # credit: the code below is modified from https://github.com/m-hahn/tabula-rasa-rnns
+import errno
+import glob
 import json
-import os.path
 import logging
+import os.path
 
 import torch
 
@@ -11,9 +13,21 @@ from .model import Model
 # set weights path
 file_path = os.path.dirname(os.path.abspath(__file__))
 WEIGHTS_DIR = os.path.join(file_path, "weight")
+
+# find model weight in lmcut/weight
+tar_paths = os.path.join(WEIGHTS_DIR, "*.pth.tar")
+weight_paths = glob.glob(tar_paths)
+
+# if there are many models in the directory, pick the first one
+if weight_paths:
+    weight_path = os.path.basename(weight_paths[0])
+
+else:
+    raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), "Model weight is not found")
+
 # best model (supports only Thai language) : "Tokenizer_2019-11-11_04.24.19"
 # best model (supports Thai + English) : "Tokenizer_2022-05-04_10.22.18"
-WEIGHT_FILE_NAME = "Tokenizer_2022-05-04_10.22.18"
+WEIGHT_FILE_NAME = weight_path[:-8]
 WEIGHTS_PATH = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME + ".pth.tar")
 PARAMS = os.path.join(WEIGHTS_DIR, WEIGHT_FILE_NAME + ".json")
 
@@ -104,7 +118,7 @@ class LM_CUT:
         if not text:
             return [""]
 
-        #text = _remove_white_space(text)
+        ฃtext = _remove_white_space(text)
         out_put = []
         sequence_length = len(text)
         test_chars = self._create_tensor_classifier(text)
