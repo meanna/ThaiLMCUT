@@ -1,5 +1,26 @@
 ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidirectional-LSTM
 =====================================================
+- [ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidirectional-LSTM](#thailmcut---word-tokenizer-for-thai-language-based-on-transfer-learning-and-bidirectional-lstm)
+  * [About](#about)
+  * [Update](#update)
+  * [Requirements](#requirements)
+- [Install LMCut as package](#install-lmcut-as-package)
+    + [Download the weight file from:](#download-the-weight-file-from-)
+  * [Tokenizer models](#tokenizer-models)
+    + [Move the weight file to this directory:](#move-the-weight-file-to-this-directory-)
+    + [Create a package wheel using:](#create-a-package-wheel-using-)
+    + [Install the package using:](#install-the-package-using-)
+- [How to use LMCut](#how-to-use-lmcut)
+    + [Tokenize a given Thai text](#tokenize-a-given-thai-text)
+- [Train a language model](#train-a-language-model)
+      - [Prepare dataset for training](#prepare-dataset-for-training)
+  * [Pretrained language model](#pretrained-language-model)
+- [Train a new tokenizer](#train-a-new-tokenizer)
+- [Credits](#credits)
+- [Acknowledgements](#acknowledgements)
+- [Contributors](#contributors)
+- [License](#license)
+
 
 ## About
 - the tokenizer utilizes transfer learning from a character language model which is trained on a large Thai hotel review corpus and [InterBEST2009](https://www.nectec.or.th/corpus/index.php?league=pm).
@@ -30,12 +51,13 @@ ThaiLMCut - Word Tokenizer for Thai Language based on Transfer Learning and bidi
 
 ### Download the weight file from:
 
-- model that supports Thai and English
+## Tokenizer models
+- tokenizer that supports Thai and English
 ```
 https://drive.google.com/drive/folders/1rUs765_FzalZWOJRSRL0cbQGW3lrV4JM?usp=sharing
 ```
 
-- model that supports only Thai
+- tokenizer that supports only Thai
 ```
 https://drive.google.com/drive/folders/1hJ4jsXdypP4mqZDsEgxEEfO-CLwAzHTj?usp=sharing
 ```
@@ -70,7 +92,7 @@ Result is a list of tokens:
 ```
 
 
-### Train a language model
+# Train a language model
 
 #### Prepare dataset for training
 - To train a language model, you should provide two .txt files of raw text.
@@ -140,8 +162,33 @@ python train/LanguageModel.py \
     LM_2022-05-03_18.28.05.pth.tar  (model weights)
     LM_log.csv    (a log file in csv, for collecting experiment results)
     ```
+    
+## Pretrained language model
+- language model trained on hotel review data(Vocab: Thai and English)
+```
+https://drive.google.com/drive/folders/1QKOctAPYIpC7b3beLGvOJ-h43-T85Yjy?usp=sharing
+```
+command to train
+```
+python train/LanguageModel.py \
+--dataset ty \
+--batchSize 64 \
+--char_dropout_prob 0.01 \
+--char_embedding_size 200 \
+--clip_grad 0.5 \
+--hidden_dim 514 \
+--layer_num 2 \
+--learning_rate 0.0001 \
+--sequence_length 150 \
+--epoch 20 \
+--len_lines_per_chunk 1000 \
+--optim adam \
+--lstm_num_direction 2 \
+--lr_decay 0.01 \
+--sgd_momentum 0.02
+```
 
-### Train a new tokenizer
+# Train a new tokenizer
 * The expected input is the InterBEST2009 dataset or any corpus with boundary marker `|`.
 * You can split InterBEST2009 using `create_dataset.py`.
 * See `data/toy` as an example.
