@@ -160,7 +160,7 @@ python train/LanguageModel.py \
 ```
 https://drive.google.com/drive/folders/1QKOctAPYIpC7b3beLGvOJ-h43-T85Yjy?usp=sharing
 ```
-command to train
+command (note: ty dataset is not publicly available)
 ```
 python train/LanguageModel.py \
 --dataset ty \
@@ -239,7 +239,7 @@ python train/Tokenizer.py \
 
 - For more detail about other arguments, see `train/Tokenizer.py` and `train/LanguageModel.py`
 
-- `data/news_00001.txt` and `data/TEST_100K.txt` are from InterBEST2009 corpus which is publicly available at [NECTEC](https://www.nectec.or.th/corpus/index.php?league=pm)
+- `data/news_00001.txt` and `data/TEST_100K.txt` are from InterBEST2009 corpus by [NECTEC](https://www.nectec.or.th/corpus/index.php?league=pm)
 
 # Credits
 * Most of the code are from [Tabula nearly rasa: Probing the Linguistic Knowledge of Character-Level Neural Language Models Trained on Unsegmented Text](https://github.com/m-hahn/tabula-rasa-rnns)
